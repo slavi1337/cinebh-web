@@ -1,2 +1,2 @@
 # cinebh-frontend
-Frontend za CineBH - AtlantBH internship
+Frontend za Cinebh - Atlantbh internship
