@@ -29,7 +29,6 @@ To ensure scalability and maintainability, the following libraries have been int
 
 The project follows a clean, feature-organized directory structure:
 
-- `src/__tests__` - Global integration and flow tests.
 - `src/assets` - Global icons, images, and base styles.
 - `src/components` - Reusable UI components (buttons, inputs, etc.) and their unit tests.
 - `src/pages` - Feature-based views (Homepage, Movie Details, Profile).
@@ -37,7 +36,7 @@ The project follows a clean, feature-organized directory structure:
 - `src/hooks` - Shared custom React hooks.
 - `src/types` - TypeScript interfaces and domain-specific models.
 - `src/utils` - Helper functions and utility constants.
-- `src/tests` - Test environment configurations (Vitest setup).
+- `src/tests` - Test environment configurations(Vitest setup) and global tests.
 
 ## Getting Started
 
