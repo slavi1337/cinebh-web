@@ -45,3 +45,28 @@ The project follows a clean, feature-organized directory structure:
 
 - **Node.js:** v20.x or higher (LTS recommended)
 - **npm:** v10.x or higher
+
+### Installation & Local Development
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone -b develop https://github.com/slavi1337/cinebh-web.git
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Run unit tests:**
+   ```bash
+   npm run test
+   ```
