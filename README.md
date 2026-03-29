@@ -1,6 +1,6 @@
-# CineBH - Web Application
+# Cinebh - Web Application
 
-CineBH is a modern, web-based ticketing application designed for a movie theater company.
+Cinebh is a modern, web-based ticketing application designed for a movie theater company.
 This repository contains the React frontend, providing users with a seamless interface for movie discovery, seat selection, and secure ticket purchasing.
 
 ## Tech Stack
@@ -29,8 +29,11 @@ To ensure scalability and maintainability, the following libraries have been int
 
 The project follows a clean, feature-organized directory structure:
 
-- `src/assets` - Global icons, images, and base styles.
-- `src/components` - Reusable UI components (buttons, inputs, etc.) and their unit tests.
+- `src/assets` - Global icons and images.
+- `src/components` - Reusable application components.
+  - `layout` - Shared layout components such as `Navbar`, `Footer`, and `MainLayout`.
+  - `ui/buttons` - Reusable button components.
+  - `ui/icons` - Reusable SVG icon components.
 - `src/pages` - Feature-based views (Homepage, Movie Details, Profile).
 - `src/services` - API integration logic and backend communication.
 - `src/hooks` - Shared custom React hooks.
