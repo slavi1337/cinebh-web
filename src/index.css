@@ -18,6 +18,13 @@
   --color-pricing-card-border-default: #e4e7ec;
   --color-pricing-card-border-featured: #98a2b3;
   --color-pricing-button-featured-text: #fcfcfd;
+
+  --color-hero-badge-background: #e4e7ec;
+  --color-hero-badge-text: #344054;
+  --color-hero-button-text: #fafafa;
+  --color-hero-overlay: rgba(0, 0, 0, 0.4);
+  --color-hero-slider-active: #ffffff;
+  --color-hero-slider-inactive: rgba(255, 255, 255, 0.5);
 }
 
 @layer base {
