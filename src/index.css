@@ -1,1 +1,27 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Urbanist", sans-serif;
+
+  --color-page-background: #f8f9fa;
+
+  --color-navbar-background: #1d2939;
+  --color-navbar-border: #667085;
+
+  --color-footer-text-light: #fef2f2;
+  --color-brand-red: #b22222;
+
+  --color-pricing-page-background: #fcfcfd;
+  --color-pricing-card-background: #fcfcfd;
+  --color-pricing-heading-text: #1d2939;
+  --color-pricing-description-text: #1d2939;
+  --color-pricing-card-border-default: #e4e7ec;
+  --color-pricing-card-border-featured: #98a2b3;
+  --color-pricing-button-featured-text: #fcfcfd;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-white antialiased;
+  }
+}
