@@ -25,9 +25,9 @@ export default function AboutUsPage() {
 
           <div>
             <p className="text-[16px] leading-6 font-normal tracking-[0.005em] text-pricing-description-text">
-              Welcome to cinebh, where movie magic comes to life.
+              Welcome to Cinebh, where movie magic comes to life.
               <br />
-              At cinebh, we're not just about screening films; we're passionate
+              At Cinebh, we're not just about screening films; we're passionate
               about creating unforgettable cinematic experiences. Since our
               establishment, we've been dedicated to providing our audience with
               top-quality entertainment in a comfortable and welcoming
@@ -43,7 +43,7 @@ export default function AboutUsPage() {
               As a hub for community entertainment, we take pride in being more
               than just a cinema.
               <br />
-              Join us at cinebh and discover why we're not just your average
+              Join us at Cinebh and discover why we're not just your average
               movie theater—we're your destination for cinematic excellence and
               entertainment bliss.
             </p>

@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 /**
- * Vite configuration file for the CineBH frontend application.
+ * Vite configuration file for the Cinebh frontend application.
  * Defines plugins (React, Tailwind), testing environment (Vitest), and server settings.
  */
 export default defineConfig({

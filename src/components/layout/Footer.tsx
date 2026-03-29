@@ -14,7 +14,7 @@ export default function Footer() {
 
       <div className="relative flex flex-col items-center gap-2.5 text-footer-text-light">
         <Link to="/">
-          <img src={logo} alt="cinebh Logo" className="h-8 w-auto" />
+          <img src={logo} alt="Cinebh Logo" className="h-8 w-auto" />
         </Link>
 
         <div className="flex items-center gap-4 text-[12px] leading-4 tracking-[0.05em] uppercase pt-1">
@@ -28,7 +28,7 @@ export default function Footer() {
         </div>
 
         <p className="px-4 pt-2 text-center text-[14px] leading-5 font-normal">
-          Copyright @cinebh. Built with love in Sarajevo. All rights reserved.
+          Copyright @Cinebh. Built with love in Sarajevo. All rights reserved.
         </p>
       </div>
     </footer>

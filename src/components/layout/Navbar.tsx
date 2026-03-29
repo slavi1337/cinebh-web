@@ -28,7 +28,7 @@ export default function Navbar() {
     <header className="relative z-50 w-full border-b border-navbar-border bg-navbar-background">
       <div className="relative mx-auto flex h-20 max-w-360 items-center justify-between px-4 md:px-6 lg:px-23">
         <Link to="/" className="z-20 flex shrink-0 items-center">
-          <img src={logo} alt="cinebh Logo" className="h-8 w-auto" />
+          <img src={logo} alt="Cinebh Logo" className="h-8 w-auto" />
         </Link>
 
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 md:flex lg:gap-6">
