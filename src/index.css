@@ -30,6 +30,26 @@
   --color-venue-card-background: #fcfcfd;
   --color-venue-card-border: #e4e7ec;
   --color-venue-card-text: #98a2b3;
+
+  --color-section-heading-text: #1d2939;
+  --color-section-link-text: #b22222;
+
+  --color-card-background: #ffffff;
+  --color-card-border: #e4e7ec;
+
+  --color-card-title-text: #1d2939;
+  --color-card-meta-text: #667085;
+
+  --color-pagination-button-background: #ffffff;
+  --color-pagination-button-border: #e4e7ec;
+  --color-pagination-button-disabled: #ffffff;
+  --color-pagination-icon: #1d2939;
+  --color-pagination-text: #1d2939;
+  --color-pagination-button-icon: #1d2939;
+  --color-pagination-button-icon-disabled: #e4e7ec;
+
+  --color-pagination-button-hover: #f9fafb;
+  --color-pagination-button-border-hover: #d0d5dd;
 }
 
 @keyframes marquee-left {
