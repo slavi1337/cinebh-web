@@ -25,6 +25,24 @@
   --color-hero-overlay: rgba(0, 0, 0, 0.4);
   --color-hero-slider-active: #ffffff;
   --color-hero-slider-inactive: rgba(255, 255, 255, 0.5);
+
+  --color-venues-section-background: #fcfcfd;
+  --color-venue-card-background: #fcfcfd;
+  --color-venue-card-border: #e4e7ec;
+  --color-venue-card-text: #98a2b3;
+}
+
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-left 25s linear infinite;
 }
 
 @layer base {
