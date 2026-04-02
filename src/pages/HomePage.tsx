@@ -1,174 +1,114 @@
-import HeroSection from "../components/home/HeroSection";
-import VenuesMarquee from "../components/home/VenuesMarquee";
-import ContentSection from "../components/home/ContentSection";
-import MovieCard from "../components/home/MovieCard";
-import VenueCard from "../components/home/VenueCard";
-
-import avatarPoster from "../assets/avatar-hero.jpg";
-import creatorPoster from "../assets/creator-hero.jpg";
-import rebelMoonPoster from "../assets/rebel-moon-hero.jpg";
-
-const currentlyShowingMovies = [
-  {
-    title: "Avatar",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Kreator",
-    image: creatorPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Rebel Moon: Part one",
-    image: rebelMoonPoster,
-    duration: "123 MIN",
-    category: "Thriller",
-  },
-  {
-    title: "Napoleon",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "SF",
-  },
-  {
-    title: "Dune",
-    image: avatarPoster,
-    duration: "126 MIN",
-    category: "Sci-Fi",
-  },
-  {
-    title: "Interstellar",
-    image: creatorPoster,
-    duration: "169 MIN",
-    category: "Drama",
-  },
-  {
-    title: "Avatar",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Kreator",
-    image: creatorPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Rebel Moon: Part one",
-    image: rebelMoonPoster,
-    duration: "123 MIN",
-    category: "Thriller",
-  },
-  {
-    title: "Napoleon",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "SF",
-  },
-  {
-    title: "Dune",
-    image: avatarPoster,
-    duration: "126 MIN",
-    category: "Sci-Fi",
-  },
-  {
-    title: "Interstellar",
-    image: creatorPoster,
-    duration: "169 MIN",
-    category: "Drama",
-  },
-];
-
-const upcomingMovies = [
-  {
-    title: "Avatar",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Kreator",
-    image: creatorPoster,
-    duration: "117 MIN",
-    category: "Fantasy",
-  },
-  {
-    title: "Rebel Moon: Part one",
-    image: rebelMoonPoster,
-    duration: "123 MIN",
-    category: "Thriller",
-  },
-  {
-    title: "Napoleon",
-    image: avatarPoster,
-    duration: "117 MIN",
-    category: "SF",
-  },
-  {
-    title: "Gladiator II",
-    image: avatarPoster,
-    duration: "122 MIN",
-    category: "Action",
-  },
-];
-
-const venues = [
-  {
-    title: "Cineplex",
-    image: avatarPoster,
-    address: "Zmaja od Bosne 4, Sarajevo 71000",
-  },
-  {
-    title: "Cinestar",
-    image: creatorPoster,
-    address: "Dzemala Bijedica St 160n, Sarajevo 71000",
-  },
-  {
-    title: "Meeting Point",
-    image: rebelMoonPoster,
-    address: "Hamdije Kresevljakovica 13, Sarajevo 71000",
-  },
-  {
-    title: "Cinema City",
-    image: rebelMoonPoster,
-    address: "Marsala Tita 26, Sarajevo 71000",
-  },
-  {
-    title: "Apollo",
-    image: creatorPoster,
-    address: "Bulevar 12, Sarajevo 71000",
-  },
-];
+import { useEffect, useState } from "react";
+import HeroSection from "@/components/home/HeroSection";
+import MovieCard from "@/components/home/MovieCard";
+import PaginatedSection from "@/components/home/PaginatedSection";
+import VenueCard from "@/components/home/VenueCard";
+import VenuesMarquee from "@/components/home/VenuesMarquee";
+import {
+  getCurrentlyShowingMovies,
+  getHeroMovies,
+  getUpcomingMovies,
+} from "@/services/movieService";
+import { getVenues } from "@/services/venueService";
+import type {
+  HeroMovie,
+  MovieCardItem,
+  PageResponse,
+  VenueCardItem,
+} from "@/types/homepage";
 
 export default function HomePage() {
-  return (
-    <div className="w-full">
-      <HeroSection />
-      <VenuesMarquee />
+  const [heroMovies, setHeroMovies] = useState<HeroMovie[]>([]);
+  const [currentlyShowing, setCurrentlyShowing] =
+    useState<PageResponse<MovieCardItem> | null>(null);
+  const [upcomingMovies, setUpcomingMovies] =
+    useState<PageResponse<MovieCardItem> | null>(null);
+  const [venues, setVenues] = useState<PageResponse<VenueCardItem> | null>(
+    null,
+  );
 
-      <ContentSection
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    async function fetchHomepageData() {
+      try {
+        setIsLoading(true);
+        setIsError(false);
+
+        const [heroData, currentlyShowingData, upcomingData, venuesData] =
+          await Promise.all([
+            getHeroMovies(),
+            getCurrentlyShowingMovies(0, 10),
+            getUpcomingMovies(0, 10),
+            getVenues(0, 10),
+          ]);
+
+        setHeroMovies(heroData);
+        setCurrentlyShowing(currentlyShowingData);
+        setUpcomingMovies(upcomingData);
+        setVenues(venuesData);
+      } catch (error) {
+        console.error("Failed to fetch homepage data:", error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchHomepageData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-page-background px-4">
+        <p className="text-[18px] leading-7 text-pricing-heading-text">
+          Loading homepage...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError || !currentlyShowing || !upcomingMovies || !venues) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center bg-page-background px-4">
+        <p className="text-center text-[18px] leading-7 text-pricing-heading-text">
+          Something went wrong while loading the homepage.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full bg-page-background">
+      <HeroSection movies={heroMovies} />
+      <VenuesMarquee venues={venues.items} />
+
+      <PaginatedSection
         title="Currently Showing"
         seeAllTo="/currently-showing"
-        items={currentlyShowingMovies}
-        renderCard={(movie) => <MovieCard {...movie} />}
+        items={currentlyShowing.items}
+        itemsPerPage={4}
+        getItemKey={(movie) => movie.id}
+        renderItem={(movie) => <MovieCard movie={movie} />}
       />
 
-      <ContentSection
+      <PaginatedSection
         title="Upcoming Movies"
         seeAllTo="/upcoming"
-        items={upcomingMovies}
-        renderCard={(movie) => <MovieCard {...movie} />}
+        items={upcomingMovies.items}
+        itemsPerPage={4}
+        getItemKey={(movie) => movie.id}
+        renderItem={(movie) => <MovieCard movie={movie} />}
       />
 
-      <ContentSection
+      <PaginatedSection
         title="Venues"
         seeAllTo="/venues"
-        items={venues}
-        renderCard={(venue) => <VenueCard {...venue} />}
+        items={venues.items}
+        itemsPerPage={4}
+        getItemKey={(venue) => venue.id}
+        renderItem={(venue) => <VenueCard venue={venue} />}
       />
     </div>
   );

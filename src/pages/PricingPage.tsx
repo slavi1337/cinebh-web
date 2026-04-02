@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import CheckmarkIcon from "../components/ui/icons/CheckmarkIcon";
+import CheckmarkIcon from "@/components/ui/icons/CheckmarkIcon";
 
 const pricingTiers = [
   {

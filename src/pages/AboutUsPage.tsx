@@ -1,4 +1,4 @@
-import chairs from "../assets/chairs.jpg";
+import chairs from "@/assets/chairs.jpg";
 
 export default function AboutUsPage() {
   return (

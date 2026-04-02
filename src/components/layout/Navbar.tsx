@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import SignInButton from "../ui/buttons/SignInButton";
-import logo from "../../assets/logo.png";
-import CloseIcon from "../ui/icons/CloseMenuIcon";
-import MenuIcon from "../ui/icons/MenuIcon";
+import SignInButton from "@/components/ui/buttons/SignInButton";
+import logo from "@/assets/logo.png";
+import CloseIcon from "@/components/ui/icons/CloseMenuIcon";
+import MenuIcon from "@/components/ui/icons/MenuIcon";
 
 const navItems = [
   { label: "Currently Showing", href: "/currently-showing" },

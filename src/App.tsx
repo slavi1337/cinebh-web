@@ -1,8 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MainLayout from "./components/layout/MainLayout";
-import AboutUsPage from "./pages/AboutUsPage";
-import PricingPage from "./pages/PricingPage";
-import HomePage from "./pages/HomePage";
+import MainLayout from "@/components/layout/MainLayout";
+import AboutUsPage from "@/pages/AboutUsPage";
+import HomePage from "@/pages/HomePage";
+import PricingPage from "@/pages/PricingPage";
 
 const CurrentlyShowingPage = () => <div>Currently Showing</div>;
 const UpcomingMoviesPage = () => <div>Upcoming Movies</div>;

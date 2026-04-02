@@ -1,19 +1,12 @@
-const venues = [
-  "Cineplexx",
-  "Cinestar",
-  "Cinema City",
-  "Meeting Point",
-  "Kinoteka",
-  "Kino Novi Grad",
-  "Cineplexx",
-  "Apollo",
-  "Multiplex",
-  "Kriterion",
-];
+import type { VenueCardItem } from "@/types/homepage";
 
-const duplicatedVenues = [...venues, ...venues];
+type VenuesMarqueeProps = {
+  venues: VenueCardItem[];
+};
 
-export default function VenuesMarquee() {
+export default function VenuesMarquee({ venues }: VenuesMarqueeProps) {
+  const duplicatedVenues = [...venues, ...venues];
+
   return (
     <section className="w-full overflow-hidden bg-venues-section-background">
       <div className="mx-auto flex h-41 w-full items-center overflow-hidden">
@@ -24,7 +17,7 @@ export default function VenuesMarquee() {
               className="flex h-16 min-w-31.75 shrink-0 items-center justify-center rounded-lg border border-venue-card-border bg-venue-card-background px-4"
             >
               <span className="text-center text-[24px] leading-8 font-bold tracking-[-0.0015em] text-venue-card-text">
-                {venue}
+                {venue.name}
               </span>
             </div>
           ))}

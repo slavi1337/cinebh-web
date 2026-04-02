@@ -1,26 +1,31 @@
-import { useMemo, useState } from "react";
-import type { ReactNode } from "react";
-import SectionHeader from "./SectionHeader";
-import SectionPagination from "./SectionPagination";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import SectionHeader from "@/components/home/SectionHeader";
+import SectionPagination from "@/components/home/SectionPagination";
 
-type ContentSectionProps<T> = {
+type PaginatedSectionProps<T> = {
   title: string;
   seeAllTo: string;
   items: T[];
   itemsPerPage?: number;
-  renderCard: (item: T) => ReactNode;
+  renderItem: (item: T) => ReactNode;
+  getItemKey: (item: T) => string;
 };
 
-export default function ContentSection<T>({
+export default function PaginatedSection<T>({
   title,
   seeAllTo,
   items,
   itemsPerPage = 4,
-  renderCard,
-}: ContentSectionProps<T>) {
+  renderItem,
+  getItemKey,
+}: PaginatedSectionProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [items]);
 
   const paginatedItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -31,9 +36,9 @@ export default function ContentSection<T>({
     <section className="mx-auto w-full max-w-360 px-4 py-12 md:px-8 lg:px-23">
       <SectionHeader title={title} seeAllTo={seeAllTo} />
 
-      <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {paginatedItems.map((item, index) => (
-          <div key={index}>{renderCard(item)}</div>
+      <div className="mt-10 grid grid-cols-1 justify-items-center gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {paginatedItems.map((item) => (
+          <div key={getItemKey(item)}>{renderItem(item)}</div>
         ))}
       </div>
 

@@ -1,5 +1,5 @@
-import LeftArrowIcon from "../ui/icons/LeftArrowIcon";
-import RightArrowIcon from "../ui/icons/RightArrowIcon";
+import LeftArrowIcon from "@/components/ui/icons/LeftArrowIcon";
+import RightArrowIcon from "@/components/ui/icons/RightArrowIcon";
 
 type SectionPaginationProps = {
   currentPage: number;
@@ -23,9 +23,13 @@ export default function SectionPagination({
 
   const shownItems = Math.min(currentPage * visibleItems, totalItems);
 
+  if (totalPages <= 1) {
+    return null;
+  }
+
   return (
     <div className="flex h-12 items-center gap-4">
-      <p className="text-[16px] leading-6 tracking-[0.005em] ttext-pagination-text">
+      <p className="text-[16px] leading-6 tracking-[0.005em] text-pagination-text">
         Showing <span className="font-semibold">{shownItems}</span> out of{" "}
         <span className="font-normal">{totalItems}</span>
       </p>
