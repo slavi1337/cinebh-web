@@ -59,21 +59,15 @@ export default function HomePage() {
     fetchHomepageData();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center bg-page-background px-4">
-        <p className="text-[18px] leading-7 text-pricing-heading-text">
-          Loading homepage...
-        </p>
-      </div>
-    );
-  }
+  const statusMessage = isLoading
+    ? "Loading homepage..."
+    : "Something went wrong while loading the homepage.";
 
-  if (isError || !currentlyShowing || !upcomingMovies || !venues) {
+  if (isLoading || isError || !currentlyShowing || !upcomingMovies || !venues) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center bg-page-background px-4">
         <p className="text-center text-[18px] leading-7 text-pricing-heading-text">
-          Something went wrong while loading the homepage.
+          {statusMessage}
         </p>
       </div>
     );

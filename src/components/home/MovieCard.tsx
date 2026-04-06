@@ -21,7 +21,7 @@ export default function MovieCard({ movie }: MovieCardProps) {
         <div className="mt-2 flex items-center gap-3 text-[14px] leading-5 font-normal tracking-[0.0125em] text-card-meta-text">
           <span>{movie.durationMinutes} MIN</span>
           <span className="h-4 w-px bg-card-meta-text" aria-hidden="true" />
-          <span>{movie.genreLabel}</span>
+          <span>{movie.genreLabel ?? "N/A"}</span>
         </div>
       </div>
     </article>

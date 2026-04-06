@@ -1,4 +1,5 @@
 import api from "@/services/api";
+import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 import type { HeroMovie, MovieCardItem, PageResponse } from "@/types/homepage";
 
 export async function getHeroMovies(): Promise<HeroMovie[]> {
@@ -11,7 +12,7 @@ export async function getCurrentlyShowingMovies(
   size = 10,
 ): Promise<PageResponse<MovieCardItem>> {
   const response = await api.get<PageResponse<MovieCardItem>>(
-    "/api/movies/currently-showing",
+    API_ENDPOINTS.movies.currentlyShowing,
     {
       params: { page, size },
     },
@@ -25,7 +26,7 @@ export async function getUpcomingMovies(
   size = 10,
 ): Promise<PageResponse<MovieCardItem>> {
   const response = await api.get<PageResponse<MovieCardItem>>(
-    "/api/movies/upcoming",
+    API_ENDPOINTS.movies.upcoming,
     {
       params: { page, size },
     },
