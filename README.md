@@ -31,6 +31,8 @@ The project follows a clean, feature-organized directory structure:
 
 - `src/assets` - Global icons and images.
 - `src/components` - Reusable application components.
+  - `home` - Homepage-specific shared sections and helpers
+  - `currently-showing` - Components specific to the currently showing page
   - `layout` - Shared layout components such as `Navbar`, `Footer`, and `MainLayout`.
   - `ui/buttons` - Reusable button components.
   - `ui/icons` - Reusable SVG icon components.
@@ -72,3 +74,55 @@ The project follows a clean, feature-organized directory structure:
    ```bash
    npm run test
    ```
+
+## Implemented Features
+
+The frontend currently includes:
+
+- Shared MainLayout
+- Responsive Navbar
+- Responsive Footer
+- About Us page
+- Pricing page
+- Homepage hero section with slider
+- Homepage currently showing section
+- Homepage upcoming movies section
+- Homepage venues section
+- Currently showing page with:
+  - search
+  - city filter
+  - cinema filter
+  - genre filter
+  - projection time filter
+  - 10-day date selector
+  - load more pagination
+  - empty state handling
+  - URL-synced filters and pagination
+  - API-driven content
+
+## Routing Overview
+
+The frontend currently includes routes for:
+
+- `/` - Homepage
+- `/about` - About Us
+- `/pricing` - Pricing
+- `/currently-showing` - Currently Showing page
+- `/upcoming` - Upcoming Movies placeholder
+- `/venues` - Venues placeholder
+
+## API Integration
+
+The frontend communicates with the backend using Axios and currently integrates with endpoints for:
+
+- Homepage hero content
+- Homepage currently showing section
+- Homepage upcoming movies section
+- Homepage venues section
+- Currently showing page listing
+- Currently showing page filters
+- Currently showing venues-by-city filtering
+
+## Environment Notes
+
+Make sure the backend API is running locally and that the frontend API base URL is configured correctly for local development.
