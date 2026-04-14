@@ -25,15 +25,17 @@ export default function UpcomingMoviesPage() {
     searchParams,
     query,
     page,
-    cityIds,
-    venueIds,
-    genreIds,
+    getArrayParam,
     updateParams,
     setNextPage,
   } = useListingSearchParams();
 
   const startDate = searchParams.get("startDate") ?? "";
   const endDate = searchParams.get("endDate") ?? "";
+
+  const cityIds = useMemo(() => getArrayParam("cityIds"), [getArrayParam]);
+  const venueIds = useMemo(() => getArrayParam("venueIds"), [getArrayParam]);
+  const genreIds = useMemo(() => getArrayParam("genreIds"), [getArrayParam]);
 
   const [searchValue, setSearchValue] = useState(query);
   const [movies, setMovies] = useState<UpcomingMovie[]>([]);
