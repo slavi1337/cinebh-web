@@ -50,7 +50,8 @@ export async function getUpcomingVenuesByCities(
     searchParams.append("cityIds", cityId);
   });
 
-  const suffix = searchParams.toString() ? `?${searchParams.toString()}` : "";
+  const queryString = searchParams.toString();
+  const suffix = queryString ? `?${queryString}` : "";
 
   const response = await api.get<FilterOption[]>(
     `${API_ENDPOINTS.upcomingMovies.venuesByCities}${suffix}`,
