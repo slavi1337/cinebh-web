@@ -6,7 +6,7 @@ type MovieCardProps = {
 
 export default function MovieCard({ movie }: MovieCardProps) {
   return (
-    <article className="flex h-98.75 w-full max-w-75.5 flex-col rounded-3xl border border-card-border bg-card-background p-4 shadow-[0px_2px_4px_-2px_rgba(52,64,84,0.08),0px_4px_6px_-1px_rgba(52,64,84,0.08)]">
+    <article className="cursor-pointer flex h-98.75 w-full flex-col rounded-3xl border border-card-border bg-card-background p-4 shadow-[0px_2px_4px_-2px_rgba(52,64,84,0.08),0px_4px_6px_-1px_rgba(52,64,84,0.08)]">
       <img
         src={movie.coverImageUrl}
         alt={movie.title}

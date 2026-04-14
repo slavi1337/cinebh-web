@@ -1,0 +1,12 @@
+export default function CinemaIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className="h-5 w-5"
+    >
+      <path d="M6,2 L18,2 C19.1045695,2 20,2.8954305 20,4 L20,22 L4,22 L4,4 C4,2.8954305 4.8954305,2 6,2 Z M6,20 L10,20 L10,16 L14,16 L14,20 L18,20 L18,4 L6,4 L6,20 Z M13,6 L16,6 L16,9 L13,9 L13,6 Z M8,11 L11,11 L11,14 L8,14 L8,11 Z M13,11 L16,11 L16,14 L13,14 L13,11 Z M8,6 L11,6 L11,9 L8,9 L8,6 Z" />
+    </svg>
+  );
+}

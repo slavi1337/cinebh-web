@@ -1,6 +1,7 @@
 import api from "@/services/api";
 import { API_ENDPOINTS } from "@/constants/apiEndpoints";
-import type { PageResponse, VenueCardItem } from "@/types/homepage";
+import type { PageResponse } from "@/types/common";
+import type { VenueCardItem } from "@/types/homepage";
 
 export async function getVenues(
   page = 0,

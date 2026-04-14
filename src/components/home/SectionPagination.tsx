@@ -29,7 +29,7 @@ export default function SectionPagination({
 
   return (
     <div className="flex h-12 items-center gap-4">
-      <p className="text-[16px] leading-6 tracking-[0.005em] text-pagination-text">
+      <p className="text-body-md text-pagination-text">
         Showing <span className="font-semibold">{shownItems}</span> out of{" "}
         <span className="font-normal">{totalItems}</span>
       </p>

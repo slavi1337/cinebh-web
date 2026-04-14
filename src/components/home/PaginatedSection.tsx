@@ -36,7 +36,7 @@ export default function PaginatedSection<T>({
     <section className="mx-auto w-full max-w-360 px-4 py-12 md:px-8 lg:px-23">
       <SectionHeader title={title} seeAllTo={seeAllTo} />
 
-      <div className="mt-10 grid grid-cols-1 justify-items-center gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {paginatedItems.map((item) => (
           <div key={getItemKey(item)}>{renderItem(item)}</div>
         ))}

@@ -75,7 +75,7 @@ export default function HeroSection({ movies }: HeroSectionProps) {
 
           <Link
             to="/currently-showing"
-            className="mt-6 inline-flex h-12 shrink-0 items-center justify-center rounded-lg bg-brand-red px-5 text-[16px] leading-6 font-semibold tracking-[0.005em] text-hero-button-text transition-colors hover:bg-red-800 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0"
+            className="mt-6 inline-flex h-12 shrink-0 items-center justify-center rounded-lg bg-brand-red px-5 text-body-md font-semibold text-hero-button-text transition-colors hover:bg-red-800 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0"
           >
             Buy Ticket
           </Link>

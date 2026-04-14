@@ -1,6 +1,7 @@
 import api from "@/services/api";
 import { API_ENDPOINTS } from "@/constants/apiEndpoints";
-import type { HeroMovie, MovieCardItem, PageResponse } from "@/types/homepage";
+import type { PageResponse } from "@/types/common";
+import type { HeroMovie, MovieCardItem } from "@/types/homepage";
 
 export async function getHeroMovies(): Promise<HeroMovie[]> {
   const response = await api.get<HeroMovie[]>("/api/movies/hero");
