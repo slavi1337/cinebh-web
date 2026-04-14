@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { FilterOption } from "@/types/currentlyShowing";
+import type { FilterOption } from "@/types/common";
 import ChevronDownIcon from "@/components/ui/icons/ChevronDownIcon";
 
 type FilterSelectProps = {
@@ -29,7 +29,7 @@ export default function FilterSelect({
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full cursor-pointer appearance-none rounded-lg border border-border-default bg-card-background pr-10 pl-11 text-[16px] leading-6 tracking-[0.005em] text-page-muted shadow-page-input outline-none transition-colors disabled:cursor-not-allowed disabled:bg-pagination-button-hover"
+        className="h-12 w-full cursor-pointer appearance-none rounded-lg border border-border-default bg-card-background pr-10 pl-11 text-body-md text-page-muted shadow-page-input outline-none transition-colors disabled:cursor-not-allowed disabled:bg-pagination-button-hover"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
