@@ -28,16 +28,21 @@ export default function CurrentlyShowingPage() {
     setSearchParams,
     query,
     page,
-    cityIds,
-    venueIds,
-    genreIds,
-    projectionTimes,
+    getArrayParam,
     updateParams,
     setNextPage,
   } = useListingSearchParams();
 
   const todayIsoDate = getTodayIsoDate();
   const selectedDate = searchParams.get("date") ?? todayIsoDate;
+
+  const cityIds = useMemo(() => getArrayParam("cityIds"), [getArrayParam]);
+  const venueIds = useMemo(() => getArrayParam("venueIds"), [getArrayParam]);
+  const genreIds = useMemo(() => getArrayParam("genreIds"), [getArrayParam]);
+  const projectionTimes = useMemo(
+    () => getArrayParam("projectionTimes"),
+    [getArrayParam],
+  );
 
   const [searchValue, setSearchValue] = useState(query);
   const [movies, setMovies] = useState<CurrentlyShowingMovie[]>([]);

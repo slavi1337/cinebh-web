@@ -1,9 +1,5 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-
-function getArrayParam(searchParams: URLSearchParams, key: string) {
-  return searchParams.getAll(key);
-}
 
 export default function useListingSearchParams() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,87 +9,90 @@ export default function useListingSearchParams() {
   const query = searchParams.get("query") ?? "";
   const page = Number(searchParams.get("page") ?? "0");
 
-  const cityIds = useMemo(
-    () => getArrayParam(searchParams, "cityIds"),
+  const getParam = useCallback(
+    (key: string) => searchParams.get(key),
     [searchParamsString],
   );
 
-  const venueIds = useMemo(
-    () => getArrayParam(searchParams, "venueIds"),
+  const getArrayParam = useCallback(
+    (key: string) => searchParams.getAll(key),
     [searchParamsString],
   );
 
-  const genreIds = useMemo(
-    () => getArrayParam(searchParams, "genreIds"),
-    [searchParamsString],
-  );
+  const updateParams = useCallback(
+    (
+      updates: Record<string, string | string[] | null>,
+      options?: {
+        resetPage?: boolean;
+        preserve?: Record<string, string>;
+      },
+    ) => {
+      const next = new URLSearchParams(searchParams);
 
-  const projectionTimes = useMemo(
-    () => getArrayParam(searchParams, "projectionTimes"),
-    [searchParamsString],
-  );
+      Object.entries(updates).forEach(([key, value]) => {
+        next.delete(key);
 
-  function updateParams(
-    updates: Record<string, string | string[] | null>,
-    options?: {
-      resetPage?: boolean;
-      preserve?: Record<string, string>;
-    },
-  ) {
-    const next = new URLSearchParams(searchParams);
+        if (value === null) {
+          return;
+        }
 
-    Object.entries(updates).forEach(([key, value]) => {
-      next.delete(key);
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            if (item) {
+              next.append(key, item);
+            }
+          });
+          return;
+        }
 
-      if (value === null) {
-        return;
-      }
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (item) {
-            next.append(key, item);
-          }
-        });
-        return;
-      }
-
-      if (value) {
-        next.set(key, value);
-      }
-    });
-
-    if (options?.resetPage !== false) {
-      next.set("page", "0");
-    }
-
-    if (options?.preserve) {
-      Object.entries(options.preserve).forEach(([key, value]) => {
-        if (!next.get(key)) {
+        if (value) {
           next.set(key, value);
         }
       });
-    }
 
-    setSearchParams(next, { preventScrollReset: true });
-  }
+      if (options?.resetPage !== false) {
+        next.set("page", "0");
+      }
 
-  function setNextPage() {
+      if (options?.preserve) {
+        Object.entries(options.preserve).forEach(([key, value]) => {
+          if (!next.get(key)) {
+            next.set(key, value);
+          }
+        });
+      }
+
+      setSearchParams(next, { preventScrollReset: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const setNextPage = useCallback(() => {
     const next = new URLSearchParams(searchParams);
     next.set("page", String(page + 1));
     setSearchParams(next, { preventScrollReset: true });
-  }
+  }, [page, searchParams, setSearchParams]);
 
-  return {
-    searchParams,
-    setSearchParams,
-    query,
-    page,
-    cityIds,
-    venueIds,
-    genreIds,
-    projectionTimes,
-    updateParams,
-    setNextPage,
-  };
+  return useMemo(
+    () => ({
+      searchParams,
+      setSearchParams,
+      query,
+      page,
+      getParam,
+      getArrayParam,
+      updateParams,
+      setNextPage,
+    }),
+    [
+      searchParams,
+      setSearchParams,
+      query,
+      page,
+      getParam,
+      getArrayParam,
+      updateParams,
+      setNextPage,
+    ],
+  );
 }
