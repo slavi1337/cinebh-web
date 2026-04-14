@@ -9,11 +9,6 @@ export default function useListingSearchParams() {
   const query = searchParams.get("query") ?? "";
   const page = Number(searchParams.get("page") ?? "0");
 
-  const getParam = useCallback(
-    (key: string) => searchParams.get(key),
-    [searchParamsString],
-  );
-
   const getArrayParam = useCallback(
     (key: string) => searchParams.getAll(key),
     [searchParamsString],
@@ -79,7 +74,6 @@ export default function useListingSearchParams() {
       setSearchParams,
       query,
       page,
-      getParam,
       getArrayParam,
       updateParams,
       setNextPage,
@@ -89,7 +83,6 @@ export default function useListingSearchParams() {
       setSearchParams,
       query,
       page,
-      getParam,
       getArrayParam,
       updateParams,
       setNextPage,
