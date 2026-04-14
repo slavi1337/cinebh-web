@@ -1,31 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 import FilterSelect from "@/components/common/FilterSelect";
-import CurrentlyShowingCard from "@/components/currently-showing/CurrentlyShowingCard";
 import ContentEmptyState from "@/components/common/ContentEmptyState";
 import PageStatusCard from "@/components/common/PageStatusCard";
-import DateSelector from "@/components/currently-showing/DateSelector";
+import UpcomingMovieCard from "@/components/upcoming-movies/UpcomingMovieCard";
+import DateRangeFilter from "@/components/upcoming-movies/DateRangeFilter";
 import SearchIcon from "@/components/ui/icons/SearchIcon";
 import LocationPinIcon from "@/components/ui/icons/LocationPinIcon";
 import CinemaIcon from "@/components/ui/icons/CinemaIcon";
 import GenresIcon from "@/components/ui/icons/GenresIcon";
-import ClockIcon from "@/components/ui/icons/ClockIcon";
 import useListingSearchParams from "@/hooks/useListingSearchParams";
 import {
-  getCurrentlyShowing,
-  getCurrentlyShowingFilters,
-  getVenuesByCities,
-} from "@/services/currentlyShowingService";
+  getUpcomingMovies,
+  getUpcomingMoviesFilters,
+  getUpcomingVenuesByCities,
+} from "@/services/upcomingMoviesService";
 import type { FilterOption, PageResponse } from "@/types/common";
-import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
-import { getTodayIsoDate } from "@/utils/date";
+import type { UpcomingMovie } from "@/types/upcomingMovies";
 import { getVisibleItemCount } from "@/utils/pagination";
 
-const PAGE_SIZE = 9;
+const PAGE_SIZE = 12;
 
-export default function CurrentlyShowingPage() {
+export default function UpcomingMoviesPage() {
   const {
     searchParams,
-    setSearchParams,
     query,
     page,
     getArrayParam,
@@ -33,19 +30,15 @@ export default function CurrentlyShowingPage() {
     setNextPage,
   } = useListingSearchParams();
 
-  const todayIsoDate = getTodayIsoDate();
-  const selectedDate = searchParams.get("date") ?? todayIsoDate;
+  const startDate = searchParams.get("startDate") ?? "";
+  const endDate = searchParams.get("endDate") ?? "";
 
   const cityIds = useMemo(() => getArrayParam("cityIds"), [getArrayParam]);
   const venueIds = useMemo(() => getArrayParam("venueIds"), [getArrayParam]);
   const genreIds = useMemo(() => getArrayParam("genreIds"), [getArrayParam]);
-  const projectionTimes = useMemo(
-    () => getArrayParam("projectionTimes"),
-    [getArrayParam],
-  );
 
   const [searchValue, setSearchValue] = useState(query);
-  const [movies, setMovies] = useState<CurrentlyShowingMovie[]>([]);
+  const [movies, setMovies] = useState<UpcomingMovie[]>([]);
   const [filters, setFilters] = useState<{
     cities: FilterOption[];
     venues: FilterOption[];
@@ -57,33 +50,28 @@ export default function CurrentlyShowingPage() {
   });
   const [filteredVenues, setFilteredVenues] = useState<FilterOption[]>([]);
   const [pageResponse, setPageResponse] =
-    useState<PageResponse<CurrentlyShowingMovie> | null>(null);
+    useState<PageResponse<UpcomingMovie> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFiltersLoading, setIsFiltersLoading] = useState(true);
   const [isFiltersError, setIsFiltersError] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  const hasActiveFilters = Boolean(
-    query ||
-    cityIds.length ||
-    venueIds.length ||
-    genreIds.length ||
-    projectionTimes.length,
+  const hasNonDateFilters = Boolean(
+    query || cityIds.length || venueIds.length || genreIds.length,
   );
+
+  const emptyStateTitle = hasNonDateFilters
+    ? "No movies found for selected filters"
+    : "No movies to preview for current date range";
+
+  const emptyStateDescription = hasNonDateFilters
+    ? "Try adjusting your search or filters to explore available upcoming movies."
+    : "We are working on updating our schedule for upcoming movies. Stay tuned for amazing movie experience or explore our other exciting cinema features in the meantime!";
 
   useEffect(() => {
     setSearchValue(query);
   }, [query]);
-
-  useEffect(() => {
-    if (!searchParams.get("date")) {
-      const next = new URLSearchParams(searchParams);
-      next.set("date", todayIsoDate);
-      next.set("page", "0");
-      setSearchParams(next, { replace: true, preventScrollReset: true });
-    }
-  }, [searchParams, setSearchParams, todayIsoDate]);
 
   useEffect(() => {
     async function loadFilters() {
@@ -91,7 +79,7 @@ export default function CurrentlyShowingPage() {
         setIsFiltersLoading(true);
         setIsFiltersError(false);
 
-        const response = await getCurrentlyShowingFilters();
+        const response = await getUpcomingMoviesFilters();
         setFilters(response);
         setFilteredVenues(response.venues);
       } catch {
@@ -118,7 +106,7 @@ export default function CurrentlyShowingPage() {
           return;
         }
 
-        const venues = await getVenuesByCities(cityIds);
+        const venues = await getUpcomingVenuesByCities(cityIds);
         setFilteredVenues(venues);
       } catch {
         setFilteredVenues([]);
@@ -141,13 +129,13 @@ export default function CurrentlyShowingPage() {
 
         setIsError(false);
 
-        const response = await getCurrentlyShowing({
+        const response = await getUpcomingMovies({
           query: query || undefined,
           cityIds,
           venueIds,
           genreIds,
-          date: selectedDate,
-          projectionTimes,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
           page,
           size: PAGE_SIZE,
         });
@@ -175,31 +163,20 @@ export default function CurrentlyShowingPage() {
     return () => {
       isCancelled = true;
     };
-  }, [query, cityIds, venueIds, genreIds, selectedDate, projectionTimes, page]);
+  }, [query, cityIds, venueIds, genreIds, startDate, endDate, page]);
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    updateParams(
-      { query: searchValue || null },
-      { preserve: { date: todayIsoDate } },
-    );
+    updateParams({ query: searchValue || null });
   }
 
   function handleSingleSelectParam(key: string, value: string) {
-    updateParams(
-      { [key]: value ? [value] : null },
-      { preserve: { date: todayIsoDate } },
-    );
-  }
-
-  function handleDateSelect(date: string) {
-    updateParams({ date }, { preserve: { date: todayIsoDate } });
+    updateParams({ [key]: value ? [value] : null });
   }
 
   const selectedCity = cityIds[0] ?? "";
   const selectedVenue = venueIds[0] ?? "";
   const selectedGenre = genreIds[0] ?? "";
-  const selectedProjectionTime = projectionTimes[0] ?? "";
 
   const visibleCount = useMemo(() => {
     if (!pageResponse) return 0;
@@ -208,36 +185,11 @@ export default function CurrentlyShowingPage() {
 
   const hasMore = pageResponse !== null && page < pageResponse.totalPages - 1;
 
-  const availableProjectionTimes = useMemo(() => {
-    const uniqueTimes = new Set<string>();
-
-    movies.forEach((movie) => {
-      movie.showtimes.forEach((showtime) => {
-        uniqueTimes.add(showtime.startTime.slice(0, 5));
-      });
-    });
-
-    return Array.from(uniqueTimes)
-      .sort()
-      .map((time) => ({
-        id: time,
-        label: time,
-      }));
-  }, [movies]);
-
-  const emptyStateTitle = hasActiveFilters
-    ? "No movies found for selected filters"
-    : "No movies to preview for current date";
-
-  const emptyStateDescription = hasActiveFilters
-    ? "Try adjusting your search or filters to explore available movies and showtimes."
-    : "We are working on updating our schedule for upcoming movies. Stay tuned for amazing movie experience or explore our other exciting cinema features in the meantime!";
-
   return (
     <div className="min-h-screen bg-page-background">
       <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
         <h1 className="text-[32px] leading-10 tracking-[-0.0025em] font-bold text-page-heading">
-          Currently Showing{visibleCount > 0 ? ` (${visibleCount})` : ""}
+          Upcoming Movies{visibleCount > 0 ? ` (${visibleCount})` : ""}
         </h1>
 
         <form onSubmit={handleSearchSubmit} className="mt-6">
@@ -259,14 +211,10 @@ export default function CurrentlyShowingPage() {
           <FilterSelect
             value={selectedCity}
             onChange={(value) => {
-              updateParams(
-                {
-                  cityIds: value ? [value] : null,
-                  venueIds: null,
-                  projectionTimes: null,
-                },
-                { preserve: { date: todayIsoDate } },
-              );
+              updateParams({
+                cityIds: value ? [value] : null,
+                venueIds: null,
+              });
             }}
             options={filters.cities}
             placeholder="All Cities"
@@ -277,13 +225,9 @@ export default function CurrentlyShowingPage() {
           <FilterSelect
             value={selectedVenue}
             onChange={(value) => {
-              updateParams(
-                {
-                  venueIds: value ? [value] : null,
-                  projectionTimes: null,
-                },
-                { preserve: { date: todayIsoDate } },
-              );
+              updateParams({
+                venueIds: value ? [value] : null,
+              });
             }}
             options={filteredVenues}
             placeholder="All Cinemas"
@@ -300,34 +244,24 @@ export default function CurrentlyShowingPage() {
             disabled={isFiltersLoading || isFiltersError}
           />
 
-          <FilterSelect
-            value={selectedProjectionTime}
-            onChange={(value) =>
-              handleSingleSelectParam("projectionTimes", value)
+          <DateRangeFilter
+            startDate={startDate}
+            endDate={endDate}
+            onChange={(nextStartDate, nextEndDate) =>
+              updateParams({
+                startDate: nextStartDate,
+                endDate: nextEndDate,
+              })
             }
-            options={availableProjectionTimes}
-            placeholder="All Projection Times"
-            icon={<ClockIcon />}
-            disabled={!selectedVenue || isFiltersLoading || isFiltersError}
+            disabled={isFiltersLoading || isFiltersError}
           />
         </div>
 
-        <div className="mt-6">
-          <DateSelector
-            selectedDate={selectedDate}
-            onSelect={handleDateSelect}
-          />
-        </div>
-
-        <p className="mt-4 text-[14px] leading-5 tracking-[0.0025em] italic text-page-muted">
-          Quick reminder that our cinema schedule is on a ten-day update cycle.
-        </p>
-
-        <div className="mt-4">
+        <div className="mt-8">
           {isLoading ? (
-            <PageStatusCard label="Loading currently showing movies..." />
+            <PageStatusCard label="Loading upcoming movies..." />
           ) : isError ? (
-            <PageStatusCard label="Something went wrong while loading currently showing movies." />
+            <PageStatusCard label="Something went wrong while loading upcoming movies." />
           ) : movies.length === 0 ? (
             <ContentEmptyState
               title={emptyStateTitle}
@@ -335,9 +269,9 @@ export default function CurrentlyShowingPage() {
             />
           ) : (
             <>
-              <div className="space-y-5">
+              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {movies.map((movie) => (
-                  <CurrentlyShowingCard key={movie.movieId} movie={movie} />
+                  <UpcomingMovieCard key={movie.movieId} movie={movie} />
                 ))}
               </div>
 

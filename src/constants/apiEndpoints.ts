@@ -9,6 +9,11 @@ export const API_ENDPOINTS = {
     filters: "/api/currently-showing/filters",
     venuesByCities: "/api/currently-showing/filters/venues",
   },
+  upcomingMovies: {
+    list: "/api/upcoming-movies",
+    filters: "/api/upcoming-movies/filters",
+    venuesByCities: "/api/upcoming-movies/filters/venues",
+  },
   venues: {
     list: "/api/venues",
   },

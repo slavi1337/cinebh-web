@@ -3,45 +3,45 @@ import { API_ENDPOINTS } from "@/constants/apiEndpoints";
 import { appendArrayParams } from "@/utils/api";
 import type { FilterOption, PageResponse } from "@/types/common";
 import type {
-  CurrentlyShowingFiltersResponse,
-  CurrentlyShowingMovie,
-  CurrentlyShowingQueryParams,
-} from "@/types/currentlyShowing";
+  GetUpcomingMoviesParams,
+  UpcomingMovie,
+  UpcomingMoviesFiltersResponse,
+} from "@/types/upcomingMovies";
 
-export async function getCurrentlyShowing(
-  params: CurrentlyShowingQueryParams,
-): Promise<PageResponse<CurrentlyShowingMovie>> {
+export async function getUpcomingMovies(
+  params: GetUpcomingMoviesParams,
+): Promise<PageResponse<UpcomingMovie>> {
   const searchParams = new URLSearchParams();
 
   if (params.query) searchParams.set("query", params.query);
-  if (params.date) searchParams.set("date", params.date);
+  if (params.startDate) searchParams.set("startDate", params.startDate);
+  if (params.endDate) searchParams.set("endDate", params.endDate);
   if (params.page !== undefined) searchParams.set("page", String(params.page));
   if (params.size !== undefined) searchParams.set("size", String(params.size));
 
   appendArrayParams(searchParams, "cityIds", params.cityIds);
   appendArrayParams(searchParams, "venueIds", params.venueIds);
   appendArrayParams(searchParams, "genreIds", params.genreIds);
-  appendArrayParams(searchParams, "projectionTimes", params.projectionTimes);
 
   const queryString = searchParams.toString();
   const suffix = queryString ? `?${queryString}` : "";
 
-  const response = await api.get<PageResponse<CurrentlyShowingMovie>>(
-    `${API_ENDPOINTS.currentlyShowing.list}${suffix}`,
+  const response = await api.get<PageResponse<UpcomingMovie>>(
+    `${API_ENDPOINTS.upcomingMovies.list}${suffix}`,
   );
 
   return response.data;
 }
 
-export async function getCurrentlyShowingFilters(): Promise<CurrentlyShowingFiltersResponse> {
-  const response = await api.get<CurrentlyShowingFiltersResponse>(
-    API_ENDPOINTS.currentlyShowing.filters,
+export async function getUpcomingMoviesFilters(): Promise<UpcomingMoviesFiltersResponse> {
+  const response = await api.get<UpcomingMoviesFiltersResponse>(
+    API_ENDPOINTS.upcomingMovies.filters,
   );
 
   return response.data;
 }
 
-export async function getVenuesByCities(
+export async function getUpcomingVenuesByCities(
   cityIds: string[],
 ): Promise<FilterOption[]> {
   const searchParams = new URLSearchParams();
@@ -54,7 +54,7 @@ export async function getVenuesByCities(
   const suffix = queryString ? `?${queryString}` : "";
 
   const response = await api.get<FilterOption[]>(
-    `${API_ENDPOINTS.currentlyShowing.venuesByCities}${suffix}`,
+    `${API_ENDPOINTS.upcomingMovies.venuesByCities}${suffix}`,
   );
 
   return response.data;
