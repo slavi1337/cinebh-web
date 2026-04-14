@@ -1,61 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import FilterSelect from "@/components/currently-showing/FilterSelect";
+import FilterSelect from "@/components/common/FilterSelect";
 import CurrentlyShowingCard from "@/components/currently-showing/CurrentlyShowingCard";
-import CurrentlyShowingEmptyState from "@/components/currently-showing/CurrentlyShowingEmptyState";
+import ContentEmptyState from "@/components/common/ContentEmptyState";
+import PageStatusCard from "@/components/common/PageStatusCard";
 import DateSelector from "@/components/currently-showing/DateSelector";
 import SearchIcon from "@/components/ui/icons/SearchIcon";
 import LocationPinIcon from "@/components/ui/icons/LocationPinIcon";
 import CinemaIcon from "@/components/ui/icons/CinemaIcon";
 import GenresIcon from "@/components/ui/icons/GenresIcon";
 import ClockIcon from "@/components/ui/icons/ClockIcon";
+import useListingSearchParams from "@/hooks/useListingSearchParams";
 import {
   getCurrentlyShowing,
   getCurrentlyShowingFilters,
   getVenuesByCities,
 } from "@/services/currentlyShowingService";
-import type {
-  CurrentlyShowingMovie,
-  FilterOption,
-  PageResponse,
-} from "@/types/currentlyShowing";
-import {
-  getTodayIsoDate,
-  getVisibleMovieCount,
-} from "@/utils/currentlyShowing";
+import type { FilterOption, PageResponse } from "@/types/common";
+import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
+import { getTodayIsoDate } from "@/utils/date";
+import { getVisibleItemCount } from "@/utils/pagination";
 
 const PAGE_SIZE = 9;
 
-function getArrayParam(searchParams: URLSearchParams, key: string) {
-  return searchParams.getAll(key);
-}
-
 export default function CurrentlyShowingPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    searchParams,
+    setSearchParams,
+    query,
+    page,
+    cityIds,
+    venueIds,
+    genreIds,
+    projectionTimes,
+    updateParams,
+    setNextPage,
+  } = useListingSearchParams();
 
-  const searchParamsString = searchParams.toString();
   const todayIsoDate = getTodayIsoDate();
-
-  const query = searchParams.get("query") ?? "";
   const selectedDate = searchParams.get("date") ?? todayIsoDate;
-  const page = Number(searchParams.get("page") ?? "0");
-
-  const cityIds = useMemo(
-    () => getArrayParam(searchParams, "cityIds"),
-    [searchParamsString],
-  );
-  const venueIds = useMemo(
-    () => getArrayParam(searchParams, "venueIds"),
-    [searchParamsString],
-  );
-  const genreIds = useMemo(
-    () => getArrayParam(searchParams, "genreIds"),
-    [searchParamsString],
-  );
-  const projectionTimes = useMemo(
-    () => getArrayParam(searchParams, "projectionTimes"),
-    [searchParamsString],
-  );
 
   const [searchValue, setSearchValue] = useState(query);
   const [movies, setMovies] = useState<CurrentlyShowingMovie[]>([]);
@@ -176,59 +158,23 @@ export default function CurrentlyShowingPage() {
     };
   }, [query, cityIds, venueIds, genreIds, selectedDate, projectionTimes, page]);
 
-  function updateParams(
-    updates: Record<string, string | string[] | null>,
-    resetPage = true,
-  ) {
-    const next = new URLSearchParams(searchParams);
-
-    Object.entries(updates).forEach(([key, value]) => {
-      next.delete(key);
-
-      if (value === null) return;
-
-      if (Array.isArray(value)) {
-        value.forEach((item) => {
-          if (item) {
-            next.append(key, item);
-          }
-        });
-        return;
-      }
-
-      if (value) {
-        next.set(key, value);
-      }
-    });
-
-    if (resetPage) {
-      next.set("page", "0");
-    }
-
-    if (!next.get("date")) {
-      next.set("date", todayIsoDate);
-    }
-
-    setSearchParams(next, { preventScrollReset: true });
-  }
-
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    updateParams({ query: searchValue || null });
+    updateParams(
+      { query: searchValue || null },
+      { preserve: { date: todayIsoDate } },
+    );
   }
 
   function handleSingleSelectParam(key: string, value: string) {
-    updateParams({ [key]: value ? [value] : null });
+    updateParams(
+      { [key]: value ? [value] : null },
+      { preserve: { date: todayIsoDate } },
+    );
   }
 
   function handleDateSelect(date: string) {
-    updateParams({ date });
-  }
-
-  function handleLoadMore() {
-    const next = new URLSearchParams(searchParams);
-    next.set("page", String(page + 1));
-    setSearchParams(next, { preventScrollReset: true });
+    updateParams({ date }, { preserve: { date: todayIsoDate } });
   }
 
   const selectedCity = cityIds[0] ?? "";
@@ -238,7 +184,7 @@ export default function CurrentlyShowingPage() {
 
   const visibleCount = useMemo(() => {
     if (!pageResponse) return 0;
-    return getVisibleMovieCount(page, pageResponse.totalElements);
+    return getVisibleItemCount(page, pageResponse.totalElements, 9);
   }, [page, pageResponse]);
 
   const hasMore = pageResponse !== null && page < pageResponse.totalPages - 1;
@@ -260,6 +206,14 @@ export default function CurrentlyShowingPage() {
       }));
   }, [movies]);
 
+  const emptyStateTitle = hasActiveFilters
+    ? "No movies found for selected filters"
+    : "No movies to preview for current date";
+
+  const emptyStateDescription = hasActiveFilters
+    ? "Try adjusting your search or filters to explore available movies and showtimes."
+    : "We are working on updating our schedule for upcoming movies. Stay tuned for amazing movie experience or explore our other exciting cinema features in the meantime!";
+
   return (
     <div className="min-h-screen bg-page-background">
       <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
@@ -277,7 +231,7 @@ export default function CurrentlyShowingPage() {
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder="Search Movies"
-              className="h-12 w-full rounded-lg border border-border-default bg-white pr-4 pl-11 text-[16px] leading-6 tracking-[0.005em] text-page-muted shadow-page-input outline-none"
+              className="h-12 w-full rounded-lg border border-border-default bg-white pr-4 pl-11 text-body-md text-page-muted shadow-page-input outline-none"
             />
           </div>
         </form>
@@ -286,11 +240,14 @@ export default function CurrentlyShowingPage() {
           <FilterSelect
             value={selectedCity}
             onChange={(value) => {
-              updateParams({
-                cityIds: value ? [value] : null,
-                venueIds: null,
-                projectionTimes: null,
-              });
+              updateParams(
+                {
+                  cityIds: value ? [value] : null,
+                  venueIds: null,
+                  projectionTimes: null,
+                },
+                { preserve: { date: todayIsoDate } },
+              );
             }}
             options={filters.cities}
             placeholder="All Cities"
@@ -301,10 +258,13 @@ export default function CurrentlyShowingPage() {
           <FilterSelect
             value={selectedVenue}
             onChange={(value) => {
-              updateParams({
-                venueIds: value ? [value] : null,
-                projectionTimes: null,
-              });
+              updateParams(
+                {
+                  venueIds: value ? [value] : null,
+                  projectionTimes: null,
+                },
+                { preserve: { date: todayIsoDate } },
+              );
             }}
             options={filteredVenues}
             placeholder="All Cinemas"
@@ -346,19 +306,14 @@ export default function CurrentlyShowingPage() {
 
         <div className="mt-4">
           {isLoading ? (
-            <div className="rounded-3xl border border-border-default bg-white px-6 py-20 text-center shadow-page-input">
-              <p className="text-[16px] leading-6 text-page-muted">
-                Loading currently showing movies...
-              </p>
-            </div>
+            <PageStatusCard label="Loading currently showing movies..." />
           ) : isError ? (
-            <div className="rounded-3xl border border-border-default bg-white px-6 py-20 text-center shadow-page-input">
-              <p className="text-[16px] leading-6 text-page-muted">
-                Something went wrong while loading currently showing movies.
-              </p>
-            </div>
+            <PageStatusCard label="Something went wrong while loading currently showing movies." />
           ) : movies.length === 0 ? (
-            <CurrentlyShowingEmptyState hasActiveFilters={hasActiveFilters} />
+            <ContentEmptyState
+              title={emptyStateTitle}
+              description={emptyStateDescription}
+            />
           ) : (
             <>
               <div className="space-y-5">
@@ -371,9 +326,9 @@ export default function CurrentlyShowingPage() {
                 <div className="mt-10 flex justify-center">
                   <button
                     type="button"
-                    onClick={handleLoadMore}
+                    onClick={setNextPage}
                     disabled={isLoadingMore}
-                    className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-5 text-[16px] leading-6 tracking-[0.005em] font-semibold text-brand-red underline transition-colors hover:bg-brand-red hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-white px-5 text-body-md font-semibold text-brand-red underline transition-colors hover:bg-brand-red hover:text-white disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {isLoadingMore ? "Loading..." : "Load More"}
                   </button>

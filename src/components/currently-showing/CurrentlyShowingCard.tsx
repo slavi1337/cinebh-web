@@ -1,4 +1,5 @@
 import { useState } from "react";
+import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
 import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
 import {
   formatDuration,
@@ -28,7 +29,7 @@ export default function CurrentlyShowingCard({
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-4">
         <div className="shrink-0">
           <img
-            src={movie.posterImageUrl ?? ""}
+            src={movie.posterImageUrl || moviePosterPlaceholder}
             alt={movie.title}
             className="h-71.75 w-full rounded-2xl object-cover md:w-67.5"
           />
@@ -40,7 +41,7 @@ export default function CurrentlyShowingCard({
               {movie.title}
             </h2>
 
-            <div className="mt-4 flex flex-wrap items-center gap-y-2 text-[16px] leading-6 tracking-[0.005em] text-page-heading">
+            <div className="mt-4 flex flex-wrap items-center gap-y-2 text-body-md text-page-heading">
               {metaItems.map((item, index) => (
                 <div key={item} className="flex items-center">
                   {index > 0 && (

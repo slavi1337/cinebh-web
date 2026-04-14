@@ -24,7 +24,7 @@ export default function AboutUsPage() {
           </div>
 
           <div>
-            <p className="text-[16px] leading-6 font-normal tracking-[0.005em] text-pricing-description-text">
+            <p className="text-body-md font-normal text-pricing-description-text">
               Welcome to Cinebh, where movie magic comes to life.
               <br />
               At Cinebh, we're not just about screening films; we're passionate

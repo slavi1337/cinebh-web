@@ -1,39 +1,15 @@
 import api from "@/services/api";
 import { API_ENDPOINTS } from "@/constants/apiEndpoints";
+import { appendArrayParams } from "@/utils/api";
+import type { FilterOption, PageResponse } from "@/types/common";
 import type {
   CurrentlyShowingFiltersResponse,
   CurrentlyShowingMovie,
-  FilterOption,
-  PageResponse,
+  CurrentlyShowingQueryParams,
 } from "@/types/currentlyShowing";
 
-type GetCurrentlyShowingParams = {
-  query?: string;
-  cityIds?: string[];
-  venueIds?: string[];
-  genreIds?: string[];
-  date?: string;
-  projectionTimes?: string[];
-  page?: number;
-  size?: number;
-};
-
-function appendArrayParams(
-  searchParams: URLSearchParams,
-  key: string,
-  values?: string[],
-) {
-  if (!values?.length) return;
-
-  values.forEach((value) => {
-    if (value) {
-      searchParams.append(key, value);
-    }
-  });
-}
-
 export async function getCurrentlyShowing(
-  params: GetCurrentlyShowingParams,
+  params: CurrentlyShowingQueryParams,
 ): Promise<PageResponse<CurrentlyShowingMovie>> {
   const searchParams = new URLSearchParams();
 

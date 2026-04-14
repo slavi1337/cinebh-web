@@ -15,8 +15,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getLinkClassName = ({ isActive }: { isActive: boolean }) => {
-    const base =
-      "py-2 text-center text-[16px] leading-[24px] tracking-[0.005em] text-white transition-all";
+    const base = "py-2 text-center text-body-md text-white transition-all";
     const activeState =
       "font-semibold underline decoration-white decoration-1 underline-offset-[1px]";
     const inactiveState = "font-normal hover:text-white";

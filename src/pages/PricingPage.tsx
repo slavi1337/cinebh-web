@@ -49,7 +49,7 @@ export default function PricingPage() {
             Pricing
           </h1>
 
-          <p className="mx-auto max-w-158 text-center text-[16px] leading-6 font-normal tracking-[0.005em] text-pricing-description-text">
+          <p className="mx-auto max-w-158 text-center text-body-md font-normal text-pricing-description-text">
             Welcome to our cinema ticket pricing options! We offer three tiers
             to suit everyone's preferences. Explore our pricing options below
             and treat yourself to a cinematic adventure like never before!
@@ -85,7 +85,7 @@ export default function PricingPage() {
                       </span>
                     </div>
 
-                    <p className="mt-3 text-[16px] leading-6 font-normal tracking-[0.005em] text-pricing-description-text">
+                    <p className="mt-3 text-body-md font-normal text-pricing-description-text">
                       *per ticket
                     </p>
                   </div>
@@ -95,7 +95,7 @@ export default function PricingPage() {
                       <li key={feature} className="flex items-start gap-3">
                         <CheckmarkIcon />
 
-                        <span className="text-[16px] leading-6 font-normal tracking-[0.005em] text-pricing-description-text">
+                        <span className="text-body-md font-normal text-pricing-description-text">
                           {feature}
                         </span>
                       </li>
@@ -104,7 +104,7 @@ export default function PricingPage() {
 
                   <Link
                     to="/"
-                    className={`mx-auto inline-flex h-12 w-37.25 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-5 py-3 text-[16px] leading-6 font-semibold tracking-[0.005em] transition-colors ${
+                    className={`mx-auto inline-flex h-12 w-37.25 shrink-0 items-center justify-center whitespace-nowrap rounded-lg px-5 py-3 text-body-md font-semibold transition-colors ${
                       tier.featured
                         ? "bg-brand-red text-pricing-card-background hover:bg-red-800"
                         : "border border-brand-red bg-pricing-card-background text-brand-red hover:bg-red-50"

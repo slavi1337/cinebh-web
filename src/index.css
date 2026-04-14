@@ -81,6 +81,12 @@
   }
 }
 
+@layer components {
+  .text-body-md {
+    @apply text-[16px] leading-6 tracking-[0.005em];
+  }
+}
+
 @layer utilities {
   .shadow-page-input {
     box-shadow:

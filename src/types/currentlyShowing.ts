@@ -1,13 +1,4 @@
-export type FilterOption = {
-  id: string;
-  label: string;
-};
-
-export type CurrentlyShowingFiltersResponse = {
-  cities: FilterOption[];
-  venues: FilterOption[];
-  genres: FilterOption[];
-};
+import type { FilterOption } from "@/types/common";
 
 export type ProjectionTime = {
   projectionId: string;
@@ -16,6 +7,12 @@ export type ProjectionTime = {
   venueName: string;
   cityId: string;
   cityName: string;
+};
+
+export type CurrentlyShowingFiltersResponse = {
+  cities: FilterOption[];
+  venues: FilterOption[];
+  genres: FilterOption[];
 };
 
 export type CurrentlyShowingMovie = {
@@ -30,21 +27,13 @@ export type CurrentlyShowingMovie = {
   showtimes: ProjectionTime[];
 };
 
-export type PageResponse<T> = {
-  items: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-};
-
 export type CurrentlyShowingQueryParams = {
-  query: string;
-  cityIds: string[];
-  venueIds: string[];
-  genreIds: string[];
-  date: string;
-  projectionTimes: string[];
-  page: number;
-  size: number;
+  query?: string;
+  cityIds?: string[];
+  venueIds?: string[];
+  genreIds?: string[];
+  date?: string;
+  projectionTimes?: string[];
+  page?: number;
+  size?: number;
 };

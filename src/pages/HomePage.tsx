@@ -10,12 +10,8 @@ import {
   getUpcomingMovies,
 } from "@/services/movieService";
 import { getVenues } from "@/services/venueService";
-import type {
-  HeroMovie,
-  MovieCardItem,
-  PageResponse,
-  VenueCardItem,
-} from "@/types/homepage";
+import type { PageResponse } from "@/types/common";
+import type { HeroMovie, MovieCardItem, VenueCardItem } from "@/types/homepage";
 
 export default function HomePage() {
   const [heroMovies, setHeroMovies] = useState<HeroMovie[]>([]);
