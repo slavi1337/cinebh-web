@@ -61,6 +61,7 @@ export default function CurrentlyShowingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFiltersLoading, setIsFiltersLoading] = useState(true);
+  const [isFiltersError, setIsFiltersError] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const hasActiveFilters = Boolean(
@@ -88,10 +89,19 @@ export default function CurrentlyShowingPage() {
     async function loadFilters() {
       try {
         setIsFiltersLoading(true);
-        const response = await getCurrentlyShowingFilters();
+        setIsFiltersError(false);
 
+        const response = await getCurrentlyShowingFilters();
         setFilters(response);
         setFilteredVenues(response.venues);
+      } catch {
+        setIsFiltersError(true);
+        setFilters({
+          cities: [],
+          venues: [],
+          genres: [],
+        });
+        setFilteredVenues([]);
       } finally {
         setIsFiltersLoading(false);
       }
@@ -102,13 +112,17 @@ export default function CurrentlyShowingPage() {
 
   useEffect(() => {
     async function loadVenues() {
-      if (!cityIds.length) {
-        setFilteredVenues(filters.venues);
-        return;
-      }
+      try {
+        if (!cityIds.length) {
+          setFilteredVenues(filters.venues);
+          return;
+        }
 
-      const venues = await getVenuesByCities(cityIds);
-      setFilteredVenues(venues);
+        const venues = await getVenuesByCities(cityIds);
+        setFilteredVenues(venues);
+      } catch {
+        setFilteredVenues([]);
+      }
     }
 
     void loadVenues();
@@ -189,7 +203,7 @@ export default function CurrentlyShowingPage() {
 
   const visibleCount = useMemo(() => {
     if (!pageResponse) return 0;
-    return getVisibleItemCount(page, pageResponse.totalElements, 9);
+    return getVisibleItemCount(page, pageResponse.totalElements, PAGE_SIZE);
   }, [page, pageResponse]);
 
   const hasMore = pageResponse !== null && page < pageResponse.totalPages - 1;
@@ -257,7 +271,7 @@ export default function CurrentlyShowingPage() {
             options={filters.cities}
             placeholder="All Cities"
             icon={<LocationPinIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <FilterSelect
@@ -274,7 +288,7 @@ export default function CurrentlyShowingPage() {
             options={filteredVenues}
             placeholder="All Cinemas"
             icon={<CinemaIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <FilterSelect
@@ -283,7 +297,7 @@ export default function CurrentlyShowingPage() {
             options={filters.genres}
             placeholder="All Genres"
             icon={<GenresIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <FilterSelect
@@ -294,7 +308,7 @@ export default function CurrentlyShowingPage() {
             options={availableProjectionTimes}
             placeholder="All Projection Times"
             icon={<ClockIcon />}
-            disabled={!selectedVenue}
+            disabled={!selectedVenue || isFiltersLoading || isFiltersError}
           />
         </div>
 

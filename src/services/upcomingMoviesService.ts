@@ -23,7 +23,8 @@ export async function getUpcomingMovies(
   appendArrayParams(searchParams, "venueIds", params.venueIds);
   appendArrayParams(searchParams, "genreIds", params.genreIds);
 
-  const suffix = searchParams.toString() ? `?${searchParams.toString()}` : "";
+  const queryString = searchParams.toString();
+  const suffix = queryString ? `?${queryString}` : "";
 
   const response = await api.get<PageResponse<UpcomingMovie>>(
     `${API_ENDPOINTS.upcomingMovies.list}${suffix}`,

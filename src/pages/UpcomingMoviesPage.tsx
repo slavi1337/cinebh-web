@@ -54,6 +54,7 @@ export default function UpcomingMoviesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFiltersLoading, setIsFiltersLoading] = useState(true);
+  const [isFiltersError, setIsFiltersError] = useState(false);
   const [isError, setIsError] = useState(false);
 
   const hasNonDateFilters = Boolean(
@@ -76,10 +77,19 @@ export default function UpcomingMoviesPage() {
     async function loadFilters() {
       try {
         setIsFiltersLoading(true);
-        const response = await getUpcomingMoviesFilters();
+        setIsFiltersError(false);
 
+        const response = await getUpcomingMoviesFilters();
         setFilters(response);
         setFilteredVenues(response.venues);
+      } catch {
+        setIsFiltersError(true);
+        setFilters({
+          cities: [],
+          venues: [],
+          genres: [],
+        });
+        setFilteredVenues([]);
       } finally {
         setIsFiltersLoading(false);
       }
@@ -90,13 +100,17 @@ export default function UpcomingMoviesPage() {
 
   useEffect(() => {
     async function loadVenues() {
-      if (!cityIds.length) {
-        setFilteredVenues(filters.venues);
-        return;
-      }
+      try {
+        if (!cityIds.length) {
+          setFilteredVenues(filters.venues);
+          return;
+        }
 
-      const venues = await getUpcomingVenuesByCities(cityIds);
-      setFilteredVenues(venues);
+        const venues = await getUpcomingVenuesByCities(cityIds);
+        setFilteredVenues(venues);
+      } catch {
+        setFilteredVenues([]);
+      }
     }
 
     void loadVenues();
@@ -166,7 +180,7 @@ export default function UpcomingMoviesPage() {
 
   const visibleCount = useMemo(() => {
     if (!pageResponse) return 0;
-    return getVisibleItemCount(page, pageResponse.totalElements, 12);
+    return getVisibleItemCount(page, pageResponse.totalElements, PAGE_SIZE);
   }, [page, pageResponse]);
 
   const hasMore = pageResponse !== null && page < pageResponse.totalPages - 1;
@@ -205,7 +219,7 @@ export default function UpcomingMoviesPage() {
             options={filters.cities}
             placeholder="All Cities"
             icon={<LocationPinIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <FilterSelect
@@ -218,7 +232,7 @@ export default function UpcomingMoviesPage() {
             options={filteredVenues}
             placeholder="All Cinemas"
             icon={<CinemaIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <FilterSelect
@@ -227,7 +241,7 @@ export default function UpcomingMoviesPage() {
             options={filters.genres}
             placeholder="All Genres"
             icon={<GenresIcon />}
-            disabled={isFiltersLoading}
+            disabled={isFiltersLoading || isFiltersError}
           />
 
           <DateRangeFilter
@@ -239,6 +253,7 @@ export default function UpcomingMoviesPage() {
                 endDate: nextEndDate,
               })
             }
+            disabled={isFiltersLoading || isFiltersError}
           />
         </div>
 

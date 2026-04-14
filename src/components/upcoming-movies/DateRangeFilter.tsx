@@ -16,12 +16,14 @@ type DateRangeFilterProps = {
   startDate: string;
   endDate: string;
   onChange: (startDate: string | null, endDate: string | null) => void;
+  disabled?: boolean;
 };
 
 export default function DateRangeFilter({
   startDate,
   endDate,
   onChange,
+  disabled = false,
 }: DateRangeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [localRange, setLocalRange] = useState<DateRange | undefined>();
@@ -57,7 +59,8 @@ export default function DateRangeFilter({
       <Popover.Trigger asChild>
         <button
           type="button"
-          className="flex h-12 w-full cursor-pointer items-center justify-between rounded-lg border border-border-default bg-white px-4 text-left text-body-md text-page-muted shadow-page-input outline-none transition-colors hover:border-[#D0D5DD]"
+          disabled={disabled}
+          className="flex h-12 w-full cursor-pointer items-center justify-between rounded-lg border border-border-default bg-white px-4 text-left text-body-md text-page-muted shadow-page-input outline-none transition-colors hover:border-[#D0D5DD] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <span className="flex min-w-0 items-center gap-3">
             <span className="text-icon-default">
@@ -123,19 +126,17 @@ export default function DateRangeFilter({
           />
 
           <div className="mt-5 flex items-center justify-end gap-3">
-            <div className="mt-5 flex items-center justify-end gap-3">
-              <FilterActionButton
-                label="Cancel"
-                onClick={handleCancel}
-                className="border border-brand-red bg-white text-brand-red hover:bg-red-50"
-              />
+            <FilterActionButton
+              label="Cancel"
+              onClick={handleCancel}
+              className="border border-brand-red bg-white text-brand-red hover:bg-red-50"
+            />
 
-              <FilterActionButton
-                label="Apply"
-                onClick={handleApply}
-                className="bg-brand-red text-white hover:bg-[#8b1a1a]"
-              />
-            </div>
+            <FilterActionButton
+              label="Apply"
+              onClick={handleApply}
+              className="bg-brand-red text-white hover:bg-[#8b1a1a]"
+            />
           </div>
         </Popover.Content>
       </Popover.Portal>

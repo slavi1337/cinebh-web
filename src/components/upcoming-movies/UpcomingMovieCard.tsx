@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
 import type { UpcomingMovie } from "@/types/upcomingMovies";
 import {
@@ -11,8 +12,15 @@ type UpcomingMovieCardProps = {
 };
 
 export default function UpcomingMovieCard({ movie }: UpcomingMovieCardProps) {
-  const durationLabel = formatUpcomingDuration(movie.durationMinutes);
-  const genresLabel = formatUpcomingGenres(movie.genres);
+  const durationLabel = useMemo(
+    () => formatUpcomingDuration(movie.durationMinutes),
+    [movie.durationMinutes],
+  );
+
+  const genresLabel = useMemo(
+    () => formatUpcomingGenres(movie.genres),
+    [movie.genres],
+  );
 
   return (
     <article className="w-full cursor-pointer rounded-3xl border border-border-default bg-white p-4 shadow-movie-card transition-transform hover:-translate-y-1">

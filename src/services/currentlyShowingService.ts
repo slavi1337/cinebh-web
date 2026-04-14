@@ -23,7 +23,8 @@ export async function getCurrentlyShowing(
   appendArrayParams(searchParams, "genreIds", params.genreIds);
   appendArrayParams(searchParams, "projectionTimes", params.projectionTimes);
 
-  const suffix = searchParams.toString() ? `?${searchParams.toString()}` : "";
+  const queryString = searchParams.toString();
+  const suffix = queryString ? `?${queryString}` : "";
 
   const response = await api.get<PageResponse<CurrentlyShowingMovie>>(
     `${API_ENDPOINTS.currentlyShowing.list}${suffix}`,
