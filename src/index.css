@@ -66,6 +66,8 @@
   --color-auth-input-border: #e4e7ec;
   --color-auth-input-background: #ffffff;
   --color-auth-overlay: rgba(16, 24, 40, 0.45);
+  --color-auth-error: #f04438;
+  --color-auth-error-light: #fda29b;
 }
 
 @keyframes marquee-left {

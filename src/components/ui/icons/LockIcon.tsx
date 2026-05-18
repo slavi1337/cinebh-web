@@ -1,10 +1,8 @@
-type LeftArrowIconProps = {
+type LockIconProps = {
   className?: string;
 };
 
-export default function LeftArrowIcon({
-  className = "h-5 w-6",
-}: LeftArrowIconProps) {
+export default function LockIcon({ className = "h-5 w-5" }: LockIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -13,7 +11,14 @@ export default function LeftArrowIcon({
       className={className}
     >
       <path
-        d="m5 12 6-6m-6 6 6 6m-6-6h14"
+        d="M6.5 10h11v9h-11v-9Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
