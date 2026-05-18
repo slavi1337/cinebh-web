@@ -1,20 +1,27 @@
 export const API_ENDPOINTS = {
+  auth: {
+    login: "/auth/login",
+    signup: "/auth/signup",
+    verify: "/auth/verify",
+    refresh: "/auth/refresh",
+    logout: "/auth/logout",
+  },
   movies: {
-    hero: "/api/movies/hero",
-    currentlyShowing: "/api/movies/currently-showing",
-    upcoming: "/api/movies/upcoming",
+    hero: "/movies/hero",
+    currentlyShowing: "/movies/currently-showing",
+    upcoming: "/movies/upcoming",
   },
   currentlyShowing: {
-    list: "/api/currently-showing",
-    filters: "/api/currently-showing/filters",
-    venuesByCities: "/api/currently-showing/filters/venues",
+    list: "/currently-showing",
+    filters: "/currently-showing/filters",
+    venuesByCities: "/currently-showing/filters/venues",
   },
   upcomingMovies: {
-    list: "/api/upcoming-movies",
-    filters: "/api/upcoming-movies/filters",
-    venuesByCities: "/api/upcoming-movies/filters/venues",
+    list: "/upcoming-movies",
+    filters: "/upcoming-movies/filters",
+    venuesByCities: "/upcoming-movies/filters/venues",
   },
   venues: {
-    list: "/api/venues",
+    list: "/venues",
   },
 } as const;

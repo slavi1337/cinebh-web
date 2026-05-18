@@ -4,7 +4,7 @@ import type { PageResponse } from "@/types/common";
 import type { HeroMovie, MovieCardItem } from "@/types/homepage";
 
 export async function getHeroMovies(): Promise<HeroMovie[]> {
-  const response = await api.get<HeroMovie[]>("/api/movies/hero");
+  const response = await api.get<HeroMovie[]>(API_ENDPOINTS.movies.hero);
   return response.data;
 }
 
