@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Link } from "react-router-dom";
-import SignInButton from "@/components/ui/buttons/SignInButton";
+import NavbarAuthAction from "@/components/layout/NavbarAuthAction";
 import logo from "@/assets/logo.png";
 import CloseIcon from "@/components/ui/icons/CloseMenuIcon";
 import MenuIcon from "@/components/ui/icons/MenuIcon";
@@ -43,7 +43,7 @@ export default function Navbar() {
         </nav>
 
         <div className="z-20 hidden shrink-0 items-center justify-end md:flex">
-          <SignInButton />
+          <NavbarAuthAction />
         </div>
 
         <button
@@ -67,7 +67,7 @@ export default function Navbar() {
             </NavLink>
           ))}
           <div className="pt-4" onClick={() => setIsMobileMenuOpen(false)}>
-            <SignInButton />
+            <NavbarAuthAction />
           </div>
         </div>
       )}
