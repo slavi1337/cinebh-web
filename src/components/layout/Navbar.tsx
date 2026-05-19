@@ -24,7 +24,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="relative z-50 w-full border-b border-navbar-border bg-navbar-background">
+    <header className="fixed left-0 top-0 z-[70] w-full border-b border-navbar-border bg-navbar-background">
       <div className="relative mx-auto flex h-20 max-w-360 items-center justify-between px-4 md:px-6 lg:px-23">
         <Link to="/" className="z-20 flex shrink-0 items-center">
           <img src={logo} alt="Cinebh Logo" className="h-8 w-auto" />
@@ -66,8 +66,10 @@ export default function Navbar() {
               {item.label}
             </NavLink>
           ))}
-          <div className="pt-4" onClick={() => setIsMobileMenuOpen(false)}>
-            <NavbarAuthAction />
+          <div className="pt-4">
+            <NavbarAuthAction
+              onActionComplete={() => setIsMobileMenuOpen(false)}
+            />
           </div>
         </div>
       )}
