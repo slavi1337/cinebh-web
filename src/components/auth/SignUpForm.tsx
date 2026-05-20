@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { signupSchema } from "@/schemas/authSchemas";
 import { getApiErrorMessage } from "@/utils/auth";
 import AuthErrorMessage from "@/components/auth/AuthErrorMessage";
+import { loginWithGoogle } from "@/services/authService";
 
 type TouchedFields = {
   email: boolean;
@@ -163,7 +164,7 @@ export default function SignUpForm() {
 
         <AuthDivider text="or" />
 
-        <GoogleAuthButton label="Sign up with" />
+        <GoogleAuthButton label="Sign up with" onClick={loginWithGoogle} />
       </form>
     </>
   );

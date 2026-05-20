@@ -12,6 +12,10 @@ export async function loginUser(request: LoginRequest): Promise<AuthUser> {
   return response.data;
 }
 
+export function loginWithGoogle() {
+  window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/google`;
+}
+
 export async function registerUser(request: RegisterRequest): Promise<void> {
   await api.post(API_ENDPOINTS.auth.signup, request);
 }
@@ -24,6 +28,11 @@ export async function verifyAccount(
 
 export async function refreshAuth(): Promise<void> {
   await api.post(API_ENDPOINTS.auth.refresh);
+}
+
+export async function getCurrentUser(): Promise<AuthUser> {
+  const response = await api.get<AuthUser>(API_ENDPOINTS.auth.me);
+  return response.data;
 }
 
 export async function logoutUser(): Promise<void> {

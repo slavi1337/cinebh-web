@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     signup: "/auth/signup",
     verify: "/auth/verify",
     refresh: "/auth/refresh",
+    me: "/auth/me",
     logout: "/auth/logout",
   },
   movies: {

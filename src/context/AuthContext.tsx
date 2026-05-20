@@ -8,6 +8,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import {
+  getCurrentUser,
   loginUser,
   logoutUser,
   refreshAuth,
