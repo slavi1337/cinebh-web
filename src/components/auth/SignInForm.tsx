@@ -25,7 +25,9 @@ export default function SignInForm() {
     event.preventDefault();
     setError("");
 
-    if (!email.trim() || !password) {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password) {
       setError("Email and password are required.");
       return;
     }
@@ -34,7 +36,7 @@ export default function SignInForm() {
 
     try {
       await login({
-        email,
+        email: trimmedEmail,
         password,
         rememberMe,
       });

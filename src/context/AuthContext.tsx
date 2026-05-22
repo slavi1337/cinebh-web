@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type PropsWithChildren,
 } from "react";
@@ -87,21 +88,26 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [verificationEmail, setVerificationEmail] = useState("");
   const [pendingLogin, setPendingLogin] = useState<LoginRequest | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const toastTimeoutId = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!currentUser) return;
-
-    refreshAuth().catch(() => {
-      clearStoredUser();
-      setCurrentUser(null);
-    });
+    return () => {
+      if (toastTimeoutId.current) {
+        window.clearTimeout(toastTimeoutId.current);
+      }
+    };
   }, []);
 
   function showToast(message: string, type: ToastState["type"] = "success") {
+    if (toastTimeoutId.current) {
+      window.clearTimeout(toastTimeoutId.current);
+    }
+
     setToast({ message, type });
 
-    window.setTimeout(() => {
+    toastTimeoutId.current = window.setTimeout(() => {
       setToast(null);
+      toastTimeoutId.current = null;
     }, TOAST_DURATION_MS);
   }
 

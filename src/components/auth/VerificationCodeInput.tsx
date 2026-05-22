@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type VerificationCodeInputProps = {
   value: string;
@@ -6,19 +6,37 @@ type VerificationCodeInputProps = {
   onChange: (value: string) => void;
 };
 
+function createDigitsFromValue(value: string, length: number) {
+  return Array.from({ length }, (_, index) => value[index] ?? "");
+}
+
 export default function VerificationCodeInput({
   value,
   length = 6,
   onChange,
 }: VerificationCodeInputProps) {
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [digits, setDigits] = useState(() =>
+    createDigitsFromValue(value, length),
+  );
+
+  useEffect(() => {
+    if (value.length === 0) {
+      setDigits(createDigitsFromValue("", length));
+    }
+  }, [value, length]);
+
+  function updateDigits(nextDigits: string[]) {
+    setDigits(nextDigits);
+    onChange(nextDigits.join(""));
+  }
 
   function handleChange(index: number, nextValue: string) {
     const digit = nextValue.replace(/\D/g, "").slice(-1);
-    const nextCode = value.split("");
+    const nextDigits = [...digits];
 
-    nextCode[index] = digit;
-    onChange(nextCode.join("").slice(0, length));
+    nextDigits[index] = digit;
+    updateDigits(nextDigits);
 
     if (digit && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
@@ -29,7 +47,7 @@ export default function VerificationCodeInput({
     index: number,
     event: React.KeyboardEvent<HTMLInputElement>,
   ) {
-    if (event.key !== "Backspace" || value[index]) {
+    if (event.key !== "Backspace" || digits[index]) {
       return;
     }
 
@@ -39,13 +57,20 @@ export default function VerificationCodeInput({
   function handlePaste(event: React.ClipboardEvent<HTMLInputElement>) {
     event.preventDefault();
 
-    const pastedCode = event.clipboardData
+    const pastedDigits = event.clipboardData
       .getData("text")
       .replace(/\D/g, "")
-      .slice(0, length);
+      .slice(0, length)
+      .split("");
 
-    onChange(pastedCode);
-    inputRefs.current[Math.min(pastedCode.length, length - 1)]?.focus();
+    const nextDigits = createDigitsFromValue("", length);
+
+    pastedDigits.forEach((digit, index) => {
+      nextDigits[index] = digit;
+    });
+
+    updateDigits(nextDigits);
+    inputRefs.current[Math.min(pastedDigits.length, length - 1)]?.focus();
   }
 
   return (
@@ -56,7 +81,7 @@ export default function VerificationCodeInput({
           ref={(element) => {
             inputRefs.current[index] = element;
           }}
-          value={value[index] ?? ""}
+          value={digits[index]}
           inputMode="numeric"
           maxLength={1}
           onPaste={handlePaste}
