@@ -46,6 +46,7 @@ type AuthContextValue = {
 };
 
 const AUTH_USER_KEY = "cinebh.auth.user";
+const TOAST_DURATION_MS = 3500;
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -101,7 +102,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     window.setTimeout(() => {
       setToast(null);
-    }, 3500);
+    }, TOAST_DURATION_MS);
   }
 
   const value = useMemo<AuthContextValue>(

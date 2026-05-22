@@ -81,9 +81,7 @@ export default function SignUpForm() {
     setIsSubmitted(true);
     setFormError("");
 
-    const result = signupSchema.safeParse(formValues);
-
-    if (!result.success) {
+    if (!validationResult.success) {
       return;
     }
 
@@ -91,8 +89,8 @@ export default function SignUpForm() {
 
     try {
       await signup({
-        email: result.data.email,
-        password: result.data.password,
+        email: validationResult.data.email,
+        password: validationResult.data.password,
       });
     } catch (error) {
       setFormError(getApiErrorMessage(error));
