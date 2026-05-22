@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
     refresh: "/auth/refresh",
     me: "/auth/me",
     logout: "/auth/logout",
+    googleOAuth: "/oauth2/authorization/google",
   },
   movies: {
     hero: "/movies/hero",

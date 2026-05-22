@@ -21,7 +21,12 @@ import type {
   RegisterRequest,
   VerifyAccountRequest,
 } from "@/types/auth";
-import { isAccountNotVerifiedError } from "@/utils/auth";
+import {
+  clearAuthQueryParams,
+  isAccountNotVerifiedError,
+  isGoogleAuthSuccessRedirect,
+  shouldPersistUserInLocalStorage,
+} from "@/utils/auth";
 
 type AuthDrawerMode = "sign-in" | "sign-up" | "verify";
 
@@ -90,6 +95,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [pendingLogin, setPendingLogin] = useState<LoginRequest | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimeoutId = useRef<number | null>(null);
+
+  async function loadAuthenticatedUser() {
+    try {
+      return await getCurrentUser();
+    } catch {
+      await refreshAuth();
+      return getCurrentUser();
+    }
+  }
+
+  function handleAuthenticatedUser(user: AuthUser, isGoogleSuccess: boolean) {
+    persistUser(
+      user,
+      shouldPersistUserInLocalStorage(AUTH_USER_KEY, isGoogleSuccess),
+    );
+    setCurrentUser(user);
+
+    if (isGoogleSuccess) {
+      showToast("You have signed in with Google successfully.");
+      clearAuthQueryParams();
+    }
+  }
 
   useEffect(() => {
     return () => {
