@@ -56,6 +56,18 @@
   --color-page-muted: #667085;
   --color-border-default: #e4e7ec;
   --color-icon-default: #344054;
+
+  --color-auth-background: #1d2939;
+  --color-auth-border: #98a2b3;
+  --color-auth-text-primary: #fcfcfd;
+  --color-auth-text-muted: #98a2b3;
+  --color-auth-input-text: #101828;
+  --color-auth-input-muted: #667085;
+  --color-auth-input-border: #e4e7ec;
+  --color-auth-input-background: #ffffff;
+  --color-auth-overlay: rgba(16, 24, 40, 0.45);
+  --color-auth-error: #f04438;
+  --color-auth-error-light: #fda29b;
 }
 
 @keyframes marquee-left {

@@ -1,10 +1,8 @@
-type LeftArrowIconProps = {
+type MailIconProps = {
   className?: string;
 };
 
-export default function LeftArrowIcon({
-  className = "h-5 w-6",
-}: LeftArrowIconProps) {
+export default function MailIcon({ className = "h-5 w-5" }: MailIconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -13,7 +11,14 @@ export default function LeftArrowIcon({
       className={className}
     >
       <path
-        d="m5 12 6-6m-6 6 6 6m-6-6h14"
+        d="M4 6.5h16v11H4v-11Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m4.5 7 7.5 6 7.5-6"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
