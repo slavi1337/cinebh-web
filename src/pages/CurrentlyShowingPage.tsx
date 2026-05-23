@@ -19,6 +19,7 @@ import type { FilterOption, PageResponse } from "@/types/common";
 import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
 import { getTodayIsoDate } from "@/utils/date";
 import { getVisibleItemCount } from "@/utils/pagination";
+import { MOVIE_SEARCH_MAX_LENGTH } from "@/constants/search";
 
 const PAGE_SIZE = 9;
 
@@ -179,8 +180,11 @@ export default function CurrentlyShowingPage() {
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const normalizedSearchValue = searchValue.trim();
+
     updateParams(
-      { query: searchValue || null },
+      { query: normalizedSearchValue || null },
       { preserve: { date: todayIsoDate } },
     );
   }
@@ -248,7 +252,12 @@ export default function CurrentlyShowingPage() {
 
             <input
               value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
+              maxLength={MOVIE_SEARCH_MAX_LENGTH}
+              onChange={(event) =>
+                setSearchValue(
+                  event.target.value.slice(0, MOVIE_SEARCH_MAX_LENGTH),
+                )
+              }
               placeholder="Search Movies"
               className="h-12 w-full rounded-lg border border-border-default bg-white pr-4 pl-11 text-body-md text-page-muted shadow-page-input outline-none"
             />

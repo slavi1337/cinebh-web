@@ -17,6 +17,7 @@ import {
 import type { FilterOption, PageResponse } from "@/types/common";
 import type { UpcomingMovie } from "@/types/upcomingMovies";
 import { getVisibleItemCount } from "@/utils/pagination";
+import { MOVIE_SEARCH_MAX_LENGTH } from "@/constants/search";
 
 const PAGE_SIZE = 12;
 
@@ -167,7 +168,10 @@ export default function UpcomingMoviesPage() {
 
   function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    updateParams({ query: searchValue || null });
+
+    const normalizedSearchValue = searchValue.trim();
+
+    updateParams({ query: normalizedSearchValue || null });
   }
 
   function handleSingleSelectParam(key: string, value: string) {
@@ -200,7 +204,12 @@ export default function UpcomingMoviesPage() {
 
             <input
               value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
+              maxLength={MOVIE_SEARCH_MAX_LENGTH}
+              onChange={(event) =>
+                setSearchValue(
+                  event.target.value.slice(0, MOVIE_SEARCH_MAX_LENGTH),
+                )
+              }
               placeholder="Search Movies"
               className="h-12 w-full rounded-lg border border-border-default bg-white pr-4 pl-11 text-body-md text-page-muted shadow-page-input outline-none"
             />
