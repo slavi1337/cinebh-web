@@ -23,8 +23,8 @@ import type {
 } from "@/types/auth";
 import {
   clearAuthQueryParams,
+  getGoogleAuthRedirectStatus,
   isAccountNotVerifiedError,
-  isGoogleAuthSuccessRedirect,
   shouldPersistUserInLocalStorage,
 } from "@/utils/auth";
 
@@ -138,6 +138,34 @@ export function AuthProvider({ children }: PropsWithChildren) {
       toastTimeoutId.current = null;
     }, TOAST_DURATION_MS);
   }
+
+  useEffect(() => {
+    async function initializeAuth() {
+      const googleAuthStatus = getGoogleAuthRedirectStatus();
+      const isGoogleSuccess = googleAuthStatus === "success";
+
+      try {
+        const user = await loadAuthenticatedUser();
+
+        handleAuthenticatedUser(user, isGoogleSuccess);
+
+        if (googleAuthStatus === "failure") {
+          showToast("Google sign in failed. Please try again.", "error");
+          clearAuthQueryParams();
+        }
+      } catch {
+        clearStoredUser();
+        setCurrentUser(null);
+
+        if (googleAuthStatus) {
+          showToast("Google sign in failed. Please try again.", "error");
+          clearAuthQueryParams();
+        }
+      }
+    }
+
+    void initializeAuth();
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({

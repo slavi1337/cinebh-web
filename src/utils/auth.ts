@@ -1,7 +1,11 @@
 import { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/types/auth";
 
-const GOOGLE_SUCCESS_PARAM = "google-success";
+type GoogleAuthRedirectStatus = "success" | "failure" | null;
+
+const GOOGLE_AUTH_QUERY_PARAM = "auth";
+const GOOGLE_AUTH_SUCCESS_PARAM = "google-success";
+const GOOGLE_AUTH_FAILURE_PARAM = "google-failure";
 
 export function getApiErrorMessage(error: unknown) {
   if (error instanceof AxiosError) {
@@ -38,9 +42,19 @@ export function maskEmail(email: string) {
   return `${visible}${"*".repeat(Math.max(name.length - 2, 3))}@${domain}`;
 }
 
-export function isGoogleAuthSuccessRedirect() {
+export function getGoogleAuthRedirectStatus(): GoogleAuthRedirectStatus {
   const params = new URLSearchParams(window.location.search);
-  return params.get("auth") === GOOGLE_SUCCESS_PARAM;
+  const status = params.get(GOOGLE_AUTH_QUERY_PARAM);
+
+  if (status === GOOGLE_AUTH_SUCCESS_PARAM) {
+    return "success";
+  }
+
+  if (status === GOOGLE_AUTH_FAILURE_PARAM) {
+    return "failure";
+  }
+
+  return null;
 }
 
 export function clearAuthQueryParams() {
