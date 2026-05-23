@@ -5,7 +5,7 @@ type GoogleAuthRedirectStatus = "success" | "failure" | null;
 
 const GOOGLE_AUTH_QUERY_PARAM = "auth";
 const GOOGLE_AUTH_SUCCESS_PARAM = "google-success";
-const GOOGLE_AUTH_FAILURE_PARAM = "google-failure";
+const GOOGLE_AUTH_FAILURE_PARAM = "google-error";
 
 export function getApiErrorMessage(error: unknown) {
   if (error instanceof AxiosError) {
