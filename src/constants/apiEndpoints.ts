@@ -4,7 +4,9 @@ export const API_ENDPOINTS = {
     signup: "/auth/signup",
     verify: "/auth/verify",
     refresh: "/auth/refresh",
+    me: "/auth/me",
     logout: "/auth/logout",
+    googleOAuth: "/oauth2/authorization/google",
   },
   movies: {
     hero: "/movies/hero",

@@ -8,6 +8,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import {
+  getCurrentUser,
   loginUser,
   logoutUser,
   refreshAuth,
@@ -20,7 +21,12 @@ import type {
   RegisterRequest,
   VerifyAccountRequest,
 } from "@/types/auth";
-import { isAccountNotVerifiedError } from "@/utils/auth";
+import {
+  clearAuthQueryParams,
+  getGoogleAuthRedirectStatus,
+  isAccountNotVerifiedError,
+  shouldPersistUserInLocalStorage,
+} from "@/utils/auth";
 
 type AuthDrawerMode = "sign-in" | "sign-up" | "verify";
 
@@ -90,6 +96,28 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimeoutId = useRef<number | null>(null);
 
+  async function loadAuthenticatedUser() {
+    try {
+      return await getCurrentUser();
+    } catch {
+      await refreshAuth();
+      return getCurrentUser();
+    }
+  }
+
+  function handleAuthenticatedUser(user: AuthUser, isGoogleSuccess: boolean) {
+    persistUser(
+      user,
+      shouldPersistUserInLocalStorage(AUTH_USER_KEY, isGoogleSuccess),
+    );
+    setCurrentUser(user);
+
+    if (isGoogleSuccess) {
+      showToast("You have signed in with Google successfully.");
+      clearAuthQueryParams();
+    }
+  }
+
   useEffect(() => {
     return () => {
       if (toastTimeoutId.current) {
@@ -110,6 +138,34 @@ export function AuthProvider({ children }: PropsWithChildren) {
       toastTimeoutId.current = null;
     }, TOAST_DURATION_MS);
   }
+
+  useEffect(() => {
+    async function initializeAuth() {
+      const googleAuthStatus = getGoogleAuthRedirectStatus();
+      const isGoogleSuccess = googleAuthStatus === "success";
+
+      try {
+        const user = await loadAuthenticatedUser();
+
+        handleAuthenticatedUser(user, isGoogleSuccess);
+
+        if (googleAuthStatus === "error") {
+          showToast("Google sign in failed. Please try again.", "error");
+          clearAuthQueryParams();
+        }
+      } catch {
+        clearStoredUser();
+        setCurrentUser(null);
+
+        if (googleAuthStatus) {
+          showToast("Google sign in failed. Please try again.", "error");
+          clearAuthQueryParams();
+        }
+      }
+    }
+
+    void initializeAuth();
+  }, []);
 
   const value = useMemo<AuthContextValue>(
     () => ({

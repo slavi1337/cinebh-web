@@ -11,6 +11,7 @@ import RememberMeCheckbox from "@/components/auth/RememberMeCheckbox";
 import { useAuth } from "@/context/AuthContext";
 import { getApiErrorMessage } from "@/utils/auth";
 import AuthErrorMessage from "@/components/auth/AuthErrorMessage";
+import { loginWithGoogle } from "@/services/authService";
 
 export default function SignInForm() {
   const { closeAuthDrawer, login, openSignUp } = useAuth();
@@ -85,7 +86,7 @@ export default function SignInForm() {
 
         <AuthDivider text="or" />
 
-        <GoogleAuthButton />
+        <GoogleAuthButton onClick={loginWithGoogle} />
       </form>
     </>
   );
