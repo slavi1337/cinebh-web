@@ -20,16 +20,27 @@ type MovieScheduleCardProps = {
   onProjectionChange: (projectionId: string) => void;
   onAuthRequired: () => void;
 };
+function isSameDate(firstDate: Date, secondDate: Date) {
+  return (
+    firstDate.getFullYear() === secondDate.getFullYear() &&
+    firstDate.getMonth() === secondDate.getMonth() &&
+    firstDate.getDate() === secondDate.getDate()
+  );
+}
 function getDateLabel(date: string) {
   const parsedDate = new Date(`${date}T00:00:00`);
+  const today = new Date();
+
   return {
     day: parsedDate.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     }),
-    weekday: parsedDate.toLocaleDateString("en-US", {
-      weekday: "short",
-    }),
+    weekday: isSameDate(parsedDate, today)
+      ? "Today"
+      : parsedDate.toLocaleDateString("en-US", {
+          weekday: "short",
+        }),
   };
 }
 function formatProjectionTime(time: string) {
