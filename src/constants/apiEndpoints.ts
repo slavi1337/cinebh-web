@@ -12,6 +12,8 @@ export const API_ENDPOINTS = {
     hero: "/movies/hero",
     currentlyShowing: "/movies/currently-showing",
     upcoming: "/movies/upcoming",
+    details: (movieId: string) => `/movies/${movieId}/details`,
+    projections: (movieId: string) => `/movies/${movieId}/projections`,
   },
   currentlyShowing: {
     list: "/currently-showing",
