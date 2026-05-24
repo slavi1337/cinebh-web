@@ -74,7 +74,7 @@ export default function HeroSection({ movies }: HeroSectionProps) {
           </p>
 
           <Link
-            to="/currently-showing"
+            to={`/movies/${activeMovie.id}`}
             className="mt-6 inline-flex h-12 shrink-0 items-center justify-center rounded-lg bg-brand-red px-5 text-body-md font-semibold text-hero-button-text transition-colors hover:bg-red-800 lg:absolute lg:bottom-0 lg:left-0 lg:mt-0"
           >
             Buy Ticket
