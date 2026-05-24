@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/types/auth";
 
-type GoogleAuthRedirectStatus = "success" | "failure" | null;
+type GoogleAuthRedirectStatus = "success" | "error" | null;
 
 const GOOGLE_AUTH_QUERY_PARAM = "auth";
 const GOOGLE_AUTH_SUCCESS_PARAM = "google-success";
@@ -51,7 +51,7 @@ export function getGoogleAuthRedirectStatus(): GoogleAuthRedirectStatus {
   }
 
   if (status === GOOGLE_AUTH_FAILURE_PARAM) {
-    return "failure";
+    return "error";
   }
 
   return null;
