@@ -51,9 +51,6 @@ export default function NavbarAuthAction({
     );
   }
 
-  const userDisplayName =
-    currentUser.fullName || currentUser.email?.split("@")[0] || "Account";
-
   return (
     <div ref={menuRef} className="relative">
       <button
@@ -64,7 +61,9 @@ export default function NavbarAuthAction({
         }}
         className="flex h-12 cursor-pointer items-center gap-1 rounded-lg border border-white px-5 py-3 text-body-md font-semibold text-white transition-colors hover:bg-white/10"
       >
-        <span className="max-w-28 truncate">{userDisplayName}</span>
+        <span className="max-w-28 truncate">
+          {currentUser.fullName || currentUser.email?.split("@")[0]}
+        </span>
         <ChevronDownIcon />
       </button>
 

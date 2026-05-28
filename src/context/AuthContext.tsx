@@ -149,7 +149,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
         handleAuthenticatedUser(user, isGoogleSuccess);
 
-        if (googleAuthStatus === "error") {
+        if (googleAuthStatus === "failure") {
           showToast("Google sign in failed. Please try again.", "error");
           clearAuthQueryParams();
         }
