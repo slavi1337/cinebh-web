@@ -13,13 +13,7 @@ export async function loginUser(request: LoginRequest): Promise<AuthUser> {
 }
 
 export function loginWithGoogle() {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
-
-  if (!baseUrl) {
-    throw new Error("VITE_API_BASE_URL is not configured.");
-  }
-
-  window.location.href = `${baseUrl}${API_ENDPOINTS.auth.googleOAuth}`;
+  window.location.href = "/oauth2/authorization/google";
 }
 
 export async function registerUser(request: RegisterRequest): Promise<void> {
