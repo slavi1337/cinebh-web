@@ -7,21 +7,10 @@ import {
   formatEndDate,
   formatTimeLabel,
 } from "@/utils/currentlyShowing";
+import { formatVenueLabel, formatVenueSummary } from "@/utils/venues";
 type CurrentlyShowingCardProps = {
   movie: CurrentlyShowingMovie;
 };
-function formatVenueLabel(venueName: string, cityName: string) {
-  return `${venueName} (${cityName})`;
-}
-function formatVenueSummary(venues: string[]) {
-  if (!venues.length) {
-    return "No cinemas listed";
-  }
-  if (venues.length <= 3) {
-    return venues.join(", ");
-  }
-  return `${venues.slice(0, 3).join(", ")}...`;
-}
 export default function CurrentlyShowingCard({
   movie,
 }: CurrentlyShowingCardProps) {

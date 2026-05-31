@@ -1,3 +1,4 @@
+import ratingStar from "@/assets/rating-star.svg";
 import type { MovieDetails } from "@/types/movieDetails";
 type MovieInfoPanelProps = {
   movie: MovieDetails;
@@ -47,18 +48,7 @@ function RatingCard({
 }) {
   return (
     <div className="flex h-17 w-40 items-center gap-2 rounded-lg border border-movie-details-border bg-movie-details-card-background px-3">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        className="h-4 w-4 shrink-0 text-brand-red"
-      >
-        <path
-          d="m12 3 2.7 5.47 6.03.88-4.36 4.25 1.03 6-5.4-2.84-5.4 2.84 1.03-6-4.36-4.25 6.03-.88L12 3Z"
-          strokeWidth="1.6"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <img src={ratingStar} alt="" className="h-4 w-4 shrink-0" />
       <div>
         <div className="text-[14px] leading-5 font-semibold tracking-[0.0025em] text-movie-details-dark">
           {value === null ? "N/A" : `${value}${suffix}`}

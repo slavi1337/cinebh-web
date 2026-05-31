@@ -7,18 +7,10 @@ import {
   formatUpcomingDuration,
   formatUpcomingGenres,
 } from "@/utils/upcomingMovies";
+import { formatVenueSummary } from "@/utils/venues";
 type UpcomingMovieCardProps = {
   movie: UpcomingMovie;
 };
-function formatVenueSummary(venues: string[]) {
-  if (!venues.length) {
-    return "No cinemas listed";
-  }
-  if (venues.length <= 3) {
-    return venues.join(", ");
-  }
-  return `${venues.slice(0, 3).join(", ")}...`;
-}
 export default function UpcomingMovieCard({ movie }: UpcomingMovieCardProps) {
   const durationLabel = useMemo(
     () => formatUpcomingDuration(movie.durationMinutes),
