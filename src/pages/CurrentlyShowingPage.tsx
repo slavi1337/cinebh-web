@@ -196,6 +196,25 @@ export default function CurrentlyShowingPage() {
     );
   }
 
+  function handleVenueSelect(value: string) {
+    const updates: Record<string, string | string[] | null> = {
+      venueIds: value ? [value] : null,
+      projectionTimes: null,
+    };
+
+    if (value) {
+      const selectedVenueOption =
+        filteredVenues.find((venue) => venue.id === value) ??
+        filters.venues.find((venue) => venue.id === value);
+
+      if (selectedVenueOption?.cityId) {
+        updates.cityIds = [selectedVenueOption.cityId];
+      }
+    }
+
+    updateParams(updates, { preserve: { date: todayIsoDate } });
+  }
+
   function handleDateSelect(date: string) {
     updateParams({ date }, { preserve: { date: todayIsoDate } });
   }
@@ -285,15 +304,7 @@ export default function CurrentlyShowingPage() {
 
           <FilterSelect
             value={selectedVenue}
-            onChange={(value) => {
-              updateParams(
-                {
-                  venueIds: value ? [value] : null,
-                  projectionTimes: null,
-                },
-                { preserve: { date: todayIsoDate } },
-              );
-            }}
+            onChange={handleVenueSelect}
             options={filteredVenues}
             placeholder="All Cinemas"
             icon={<CinemaIcon />}
@@ -317,7 +328,12 @@ export default function CurrentlyShowingPage() {
             options={availableProjectionTimes}
             placeholder="All Projection Times"
             icon={<ClockIcon />}
-            disabled={!selectedVenue || isFiltersLoading || isFiltersError}
+            disabled={
+              (!selectedCity && !selectedVenue) ||
+              isLoading ||
+              isFiltersLoading ||
+              isFiltersError
+            }
           />
         </div>
 

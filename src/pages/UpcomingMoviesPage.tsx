@@ -178,6 +178,24 @@ export default function UpcomingMoviesPage() {
     updateParams({ [key]: value ? [value] : null });
   }
 
+  function handleVenueSelect(value: string) {
+    const updates: Record<string, string | string[] | null> = {
+      venueIds: value ? [value] : null,
+    };
+
+    if (value) {
+      const selectedVenueOption =
+        filteredVenues.find((venue) => venue.id === value) ??
+        filters.venues.find((venue) => venue.id === value);
+
+      if (selectedVenueOption?.cityId) {
+        updates.cityIds = [selectedVenueOption.cityId];
+      }
+    }
+
+    updateParams(updates);
+  }
+
   const selectedCity = cityIds[0] ?? "";
   const selectedVenue = venueIds[0] ?? "";
   const selectedGenre = genreIds[0] ?? "";
@@ -233,11 +251,7 @@ export default function UpcomingMoviesPage() {
 
           <FilterSelect
             value={selectedVenue}
-            onChange={(value) => {
-              updateParams({
-                venueIds: value ? [value] : null,
-              });
-            }}
+            onChange={handleVenueSelect}
             options={filteredVenues}
             placeholder="All Cinemas"
             icon={<CinemaIcon />}
