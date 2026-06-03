@@ -6,12 +6,15 @@ import CurrentlyShowingPage from "@/pages/CurrentlyShowingPage";
 import HomePage from "@/pages/HomePage";
 import PricingPage from "@/pages/PricingPage";
 import UpcomingMoviesPage from "@/pages/UpcomingMoviesPage";
+import MovieDetailsPage from "@/pages/MovieDetailsPage";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 
 const VenuesPage = () => <div>Venues</div>;
 
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route element={<MainLayout />}>
@@ -25,6 +28,7 @@ export default function App() {
               element={<CurrentlyShowingPage />}
             />
             <Route path="/upcoming" element={<UpcomingMoviesPage />} />
+            <Route path="/movies/:movieId" element={<MovieDetailsPage />} />
             <Route path="/venues" element={<VenuesPage />} />
           </Route>
         </Routes>

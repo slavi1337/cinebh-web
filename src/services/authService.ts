@@ -13,13 +13,15 @@ export async function loginUser(request: LoginRequest): Promise<AuthUser> {
 }
 
 export function loginWithGoogle() {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
-  if (!baseUrl) {
-    throw new Error("VITE_API_BASE_URL is not configured.");
+  if (!apiBaseUrl) {
+    window.location.href = API_ENDPOINTS.auth.googleOAuth;
+    return;
   }
 
-  window.location.href = `${baseUrl}${API_ENDPOINTS.auth.googleOAuth}`;
+  const oauthBaseUrl = apiBaseUrl.replace(/\/api\/v1\/?$/, "");
+  window.location.href = `${oauthBaseUrl}${API_ENDPOINTS.auth.googleOAuth}`;
 }
 
 export async function registerUser(request: RegisterRequest): Promise<void> {

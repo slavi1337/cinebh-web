@@ -12,6 +12,7 @@ export type UpcomingMovie = {
   posterImageUrl: string | null;
   durationMinutes: number | null;
   genres: string[];
+  venues: string[];
   openingDate: string;
 };
 

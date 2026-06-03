@@ -1,6 +1,5 @@
 import LeftArrowIcon from "@/components/ui/icons/LeftArrowIcon";
 import RightArrowIcon from "@/components/ui/icons/RightArrowIcon";
-
 type SectionPaginationProps = {
   currentPage: number;
   totalPages: number;
@@ -9,7 +8,6 @@ type SectionPaginationProps = {
   onPrevious: () => void;
   onNext: () => void;
 };
-
 export default function SectionPagination({
   currentPage,
   totalPages,
@@ -20,18 +18,19 @@ export default function SectionPagination({
 }: SectionPaginationProps) {
   const isPreviousDisabled = currentPage === 1;
   const isNextDisabled = currentPage === totalPages;
-
-  const shownItems = Math.min(currentPage * visibleItems, totalItems);
-
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * visibleItems + 1;
+  const endItem = Math.min(currentPage * visibleItems, totalItems);
   if (totalPages <= 1) {
     return null;
   }
-
   return (
     <div className="flex h-12 items-center gap-4">
       <p className="text-body-md text-pagination-text">
-        Showing <span className="font-semibold">{shownItems}</span> out of{" "}
-        <span className="font-normal">{totalItems}</span>
+        Showing{" "}
+        <span className="font-semibold">
+          {startItem}-{endItem}
+        </span>{" "}
+        out of <span className="font-semibold">{totalItems}</span>
       </p>
       <div className="flex items-center gap-2">
         <button
@@ -41,18 +40,15 @@ export default function SectionPagination({
           className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg border border-pagination-button-border bg-pagination-button-background transition-colors hover:border-pagination-button-border-hover hover:bg-pagination-button-hover disabled:cursor-not-allowed disabled:bg-pagination-button-disabled disabled:hover:border-pagination-button-border disabled:hover:bg-pagination-button-disabled"
         >
           <span
-            className={`${
+            className={
               isPreviousDisabled
                 ? "text-pagination-button-icon-disabled"
                 : "text-pagination-button-icon"
-            }`}
+            }
           >
             <LeftArrowIcon />
           </span>
         </button>
-
-        <span />
-
         <button
           type="button"
           onClick={onNext}
@@ -60,11 +56,11 @@ export default function SectionPagination({
           className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg border border-pagination-button-border bg-pagination-button-background transition-colors hover:border-pagination-button-border-hover hover:bg-pagination-button-hover disabled:cursor-not-allowed disabled:bg-pagination-button-disabled disabled:hover:border-pagination-button-border disabled:hover:bg-pagination-button-disabled"
         >
           <span
-            className={`${
+            className={
               isNextDisabled
                 ? "text-pagination-button-icon-disabled"
                 : "text-pagination-button-icon"
-            }`}
+            }
           >
             <RightArrowIcon />
           </span>
