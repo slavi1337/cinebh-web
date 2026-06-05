@@ -18,6 +18,7 @@ import {
 import type { FilterOption, PageResponse } from "@/types/common";
 import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
 import { getTodayIsoDate } from "@/utils/date";
+import { buildVenueFilterUpdates } from "@/utils/filterSync";
 import { getVisibleItemCount } from "@/utils/pagination";
 import { MOVIE_SEARCH_MAX_LENGTH } from "@/constants/search";
 
@@ -197,22 +198,12 @@ export default function CurrentlyShowingPage() {
   }
 
   function handleVenueSelect(value: string) {
-    const updates: Record<string, string | string[] | null> = {
-      venueIds: value ? [value] : null,
-      projectionTimes: null,
-    };
-
-    if (value) {
-      const selectedVenueOption =
-        filteredVenues.find((venue) => venue.id === value) ??
-        filters.venues.find((venue) => venue.id === value);
-
-      if (selectedVenueOption?.cityId) {
-        updates.cityIds = [selectedVenueOption.cityId];
-      }
-    }
-
-    updateParams(updates, { preserve: { date: todayIsoDate } });
+    updateParams(
+      buildVenueFilterUpdates(value, filteredVenues, filters.venues, {
+        resetProjectionTimes: true,
+      }),
+      { preserve: { date: todayIsoDate } },
+    );
   }
 
   function handleDateSelect(date: string) {

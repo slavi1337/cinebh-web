@@ -16,6 +16,7 @@ import {
 } from "@/services/upcomingMoviesService";
 import type { FilterOption, PageResponse } from "@/types/common";
 import type { UpcomingMovie } from "@/types/upcomingMovies";
+import { buildVenueFilterUpdates } from "@/utils/filterSync";
 import { getVisibleItemCount } from "@/utils/pagination";
 import { MOVIE_SEARCH_MAX_LENGTH } from "@/constants/search";
 
@@ -179,21 +180,7 @@ export default function UpcomingMoviesPage() {
   }
 
   function handleVenueSelect(value: string) {
-    const updates: Record<string, string | string[] | null> = {
-      venueIds: value ? [value] : null,
-    };
-
-    if (value) {
-      const selectedVenueOption =
-        filteredVenues.find((venue) => venue.id === value) ??
-        filters.venues.find((venue) => venue.id === value);
-
-      if (selectedVenueOption?.cityId) {
-        updates.cityIds = [selectedVenueOption.cityId];
-      }
-    }
-
-    updateParams(updates);
+    updateParams(buildVenueFilterUpdates(value, filteredVenues, filters.venues));
   }
 
   const selectedCity = cityIds[0] ?? "";
