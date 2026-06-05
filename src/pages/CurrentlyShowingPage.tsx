@@ -18,6 +18,7 @@ import {
 import type { FilterOption, PageResponse } from "@/types/common";
 import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
 import { getTodayIsoDate } from "@/utils/date";
+import { buildVenueFilterUpdates } from "@/utils/filterSync";
 import { getVisibleItemCount } from "@/utils/pagination";
 import { MOVIE_SEARCH_MAX_LENGTH } from "@/constants/search";
 
@@ -196,6 +197,15 @@ export default function CurrentlyShowingPage() {
     );
   }
 
+  function handleVenueSelect(value: string) {
+    updateParams(
+      buildVenueFilterUpdates(value, filteredVenues, filters.venues, {
+        resetProjectionTimes: true,
+      }),
+      { preserve: { date: todayIsoDate } },
+    );
+  }
+
   function handleDateSelect(date: string) {
     updateParams({ date }, { preserve: { date: todayIsoDate } });
   }
@@ -285,15 +295,7 @@ export default function CurrentlyShowingPage() {
 
           <FilterSelect
             value={selectedVenue}
-            onChange={(value) => {
-              updateParams(
-                {
-                  venueIds: value ? [value] : null,
-                  projectionTimes: null,
-                },
-                { preserve: { date: todayIsoDate } },
-              );
-            }}
+            onChange={handleVenueSelect}
             options={filteredVenues}
             placeholder="All Cinemas"
             icon={<CinemaIcon />}
@@ -317,7 +319,12 @@ export default function CurrentlyShowingPage() {
             options={availableProjectionTimes}
             placeholder="All Projection Times"
             icon={<ClockIcon />}
-            disabled={!selectedVenue || isFiltersLoading || isFiltersError}
+            disabled={
+              (!selectedCity && !selectedVenue) ||
+              isLoading ||
+              isFiltersLoading ||
+              isFiltersError
+            }
           />
         </div>
 
