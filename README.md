@@ -3,12 +3,15 @@
 Cinebh is a modern, web-based ticketing application designed for a movie theater company.
 This repository contains the React frontend, providing users with a seamless interface for movie discovery, seat selection, and secure ticket purchasing.
 
+For deployment and Jenkins/EC2 operational notes, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 ## Tech Stack
 
 - **Framework:** React 19 (Latest stable release)
 - **Build Tool:** Vite 8
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS v4
+- **Local HTTPS:** Vite Basic SSL plugin
 
 ## Key Libraries & Dependencies
 
@@ -35,6 +38,7 @@ The project follows a clean, feature-organized directory structure:
   - `home` - Homepage-specific shared sections and helpers
   - `currently-showing` - Components specific to the currently showing page
   - `upcoming-movies` - Components specific to the upcoming movies page
+  - `movie-details` - Components specific to the movie details and schedule page
   - `layout` - Shared layout components such as `Navbar`, `Footer`, and `MainLayout`.
   - `ui/buttons` - Reusable button components.
   - `ui/icons` - Reusable SVG icon components.
@@ -49,13 +53,16 @@ The project follows a clean, feature-organized directory structure:
 ## Main Features Implemented
 
 - Homepage sections
+- Email/password authentication and Google OAuth entry point
 - Static About Us and Tickets pages
 - Currently Showing page with:
   - title search
   - city filter
   - cinema filter
+  - automatic city synchronization when a cinema is selected
   - genre filter
   - projection time filter
+  - projection time filtering after city or cinema selection
   - ten-day schedule selector
   - load more pagination
   - URL-synced filters and pagination
@@ -63,10 +70,18 @@ The project follows a clean, feature-organized directory structure:
   - title search
   - city filter
   - cinema filter
+  - automatic city synchronization when a cinema is selected
   - genre filter
   - date range filter
   - load more pagination
   - URL-synced filters and pagination
+- Movie Details page with:
+  - movie metadata, synopsis, ratings, cast, directors and writers
+  - cover image, preview gallery and trailer link
+  - city and cinema filters for movie-specific schedules
+  - projection date and projection time selection
+  - upcoming movie notification state
+  - see also recommendations
 - Shared listing utilities and reusable UI components
 - Responsive layout
 
@@ -115,13 +130,46 @@ This installs, among others:
 
 Create a local environment (.env) file in the root of the project.
 
-Example:
+Current local setup uses HTTPS and local development domains so cookies and Google OAuth behave like production.
+
+Example `.env`:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080
+VITE_API_BASE_URL=https://api.cinebh.com:8443/api/v1
+```
+
+`VITE_API_BASE_URL` is the REST API base URL and should include `/api/v1`.
+
+Google OAuth does not use `/api/v1`; the frontend strips that suffix before redirecting to:
+
+```text
+/oauth2/authorization/google
 ```
 
 Do not commit real environment-specific secrets.
+
+### Local HTTPS Hostnames
+
+The Vite dev server is configured to run on:
+
+```text
+https://cinebh.com:5173
+```
+
+The local backend is expected at:
+
+```text
+https://api.cinebh.com:8443
+```
+
+Add these entries to your hosts file:
+
+```text
+127.0.0.1 cinebh.com
+127.0.0.1 api.cinebh.com
+```
+
+The project uses `@vitejs/plugin-basic-ssl`, so the browser may ask you to trust the local development certificate.
 
 ### Running the Application
 
@@ -134,7 +182,7 @@ npm run dev
 Vite will print the local URL, typically:
 
 ```text
-http://localhost:5173
+https://cinebh.com:5173
 ```
 
 ### Production Build
@@ -167,11 +215,15 @@ For full local functionality, make sure the backend is running and configured co
 
 Important API areas used by the frontend include:
 
+- authentication and current user endpoints
+- Google OAuth redirect entry point
 - homepage movie data
 - currently showing listing
 - currently showing filters and venues-by-city endpoint
 - upcoming movies listing
 - upcoming movies filters and venues-by-city endpoint
+- movie details endpoint
+- movie projections endpoint
 - venues listing
 
 ### API Endpoint Organization
@@ -208,7 +260,9 @@ The Currently Showing page includes:
 - a default current date in the URL if none is selected
 - a ten-day date selector
 - projection time filter that depends on available showtimes
+- projection time filter availability after selecting a city or cinema
 - venue filtering based on selected city
+- automatic city synchronization when a cinema is selected
 
 To test it properly, the backend/database should include:
 
@@ -223,6 +277,7 @@ The Upcoming Movies page includes:
 
 - search by title
 - city/cinema/genre filters
+- automatic city synchronization when a cinema is selected
 - custom date range picker built with React Day Picker and Radix Popover
 - load more pagination
 - venue filtering based on selected city
@@ -232,6 +287,25 @@ To test it properly, the backend/database should include:
 - enough upcoming movies for multiple pages
 - future projections in multiple venues/cities
 - release dates both near-term and farther in the future
+
+### Movie Details Notes
+
+The Movie Details page includes:
+
+- detailed movie information and media gallery
+- city and cinema filters based on movie-specific projection metadata
+- projection dates returned by the backend
+- projection times fetched for the selected date, city and cinema
+- see also movie recommendations
+- separate upcoming movie notification card when ticket purchase is not available yet
+
+To test it properly, the backend/database should include:
+
+- movies with cover and preview images
+- cast, director and writer data
+- currently showing and upcoming movie examples
+- projection dates across multiple cinemas and cities
+- related movies for the see also section
 
 ### Additional UI / Package Notes
 
@@ -322,30 +396,35 @@ Check:
 
 ## Deployment Notes for DevOps
 
-To deploy the frontend successfully, DevOps should ensure:
+Detailed deployment notes are maintained in [DEPLOYMENT.md](DEPLOYMENT.md).
+
+At a high level, DevOps should ensure:
 
 - correct Node/npm version in the build environment
-- correct frontend environment variables
-- correct backend API base URL for the target environment
-- correct static asset serving configuration
+- correct `VITE_API_BASE_URL` build argument for the target environment
+- correct static asset serving configuration with SPA fallback
 - SPA routing support on the hosting platform
+- backend proxy routes for `/api/**`, `/oauth2/**`, `/login/**`, `/swagger-ui/**`, and `/v3/api-docs/**` if using same-origin routing
+- HTTPS on the public application domain
+- Google Console redirect URI matches the deployed OAuth callback
 
 ## Suggested Local End-to-End Setup
 
 1. Start PostgreSQL and required backend services
 2. Start the backend API locally
 3. Install frontend dependencies with `npm install`
-4. Configure frontend environment variables if needed
+4. Configure `.env` with `VITE_API_BASE_URL=https://api.cinebh.com:8443/api/v1`
 5. Run `npm run dev`
-6. Open the frontend in the browser
-7. Verify homepage, currently showing, and upcoming pages against seeded backend data
+6. Open `https://cinebh.com:5173`
+7. Verify homepage, currently showing, upcoming and movie details pages against seeded backend data
 
 ## Quick Start Summary
 
 1. Install Node.js and npm
 2. Clone the repository
 3. Run `npm install`
-4. Configure `VITE_API_BASE_URL` if needed
-5. Start the backend
-6. Run `npm run dev`
-7. Open the app in the browser and test the listing pages
+4. Add local hosts entries for `cinebh.com` and `api.cinebh.com`
+5. Configure `VITE_API_BASE_URL=https://api.cinebh.com:8443/api/v1`
+6. Start the backend
+7. Run `npm run dev`
+8. Open the app in the browser and test the listing and movie details pages
