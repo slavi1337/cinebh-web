@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Urbanist", sans-serif;
+
+  --color-page-background: #f8f9fa;
+
+  --color-navbar-background: #1d2939;
+  --color-navbar-border: #667085;
+
+  --color-footer-text-light: #fef2f2;
+  --color-brand-red: #b22222;
+
+  --color-pricing-page-background: #fcfcfd;
+  --color-pricing-card-background: #fcfcfd;
+  --color-pricing-heading-text: #1d2939;
+  --color-pricing-description-text: #1d2939;
+  --color-pricing-card-border-default: #e4e7ec;
+  --color-pricing-card-border-featured: #98a2b3;
+  --color-pricing-button-featured-text: #fcfcfd;
+
+  --color-hero-badge-background: #e4e7ec;
+  --color-hero-badge-text: #344054;
+  --color-hero-button-text: #fafafa;
+  --color-hero-overlay: rgba(0, 0, 0, 0.4);
+  --color-hero-slider-active: #ffffff;
+  --color-hero-slider-inactive: rgba(255, 255, 255, 0.5);
+
+  --color-venues-section-background: #fcfcfd;
+  --color-venue-card-background: #fcfcfd;
+  --color-venue-card-border: #e4e7ec;
+  --color-venue-card-text: #98a2b3;
+
+  --color-section-heading-text: #1d2939;
+  --color-section-link-text: #b22222;
+
+  --color-card-background: #ffffff;
+  --color-card-border: #e4e7ec;
+
+  --color-card-title-text: #1d2939;
+  --color-card-meta-text: #667085;
+
+  --color-pagination-button-background: #ffffff;
+  --color-pagination-button-border: #e4e7ec;
+  --color-pagination-button-disabled: #ffffff;
+  --color-pagination-icon: #1d2939;
+  --color-pagination-text: #1d2939;
+  --color-pagination-button-icon: #1d2939;
+  --color-pagination-button-icon-disabled: #e4e7ec;
+
+  --color-pagination-button-hover: #f9fafb;
+  --color-pagination-button-border-hover: #d0d5dd;
+
+  --color-page-background: #fcfcfd;
+  --color-page-heading: #1d2939;
+  --color-page-muted: #667085;
+  --color-border-default: #e4e7ec;
+  --color-icon-default: #344054;
+
+  --color-auth-background: #1d2939;
+  --color-auth-border: #98a2b3;
+  --color-auth-text-primary: #fcfcfd;
+  --color-auth-text-muted: #98a2b3;
+  --color-auth-input-text: #101828;
+  --color-auth-input-muted: #667085;
+  --color-auth-input-border: #e4e7ec;
+  --color-auth-input-background: #ffffff;
+  --color-auth-overlay: rgba(16, 24, 40, 0.45);
+  --color-auth-error: #f04438;
+  --color-auth-error-light: #fda29b;
+
+  --color-movie-details-heading: #1d2939;
+  --color-movie-details-muted: #667085;
+  --color-movie-details-dark: #101828;
+  --color-movie-details-chip-background: #e4e7ec;
+  --color-movie-details-card-background: #fcfcfd;
+  --color-movie-details-border: #e4e7ec;
+}
+
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  animation: marquee-left 25s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-white antialiased;
+  }
+}
+
+@layer components {
+  .text-body-md {
+    @apply text-[16px] leading-6 tracking-[0.005em];
+  }
+}
+
+@layer utilities {
+  .shadow-page-input {
+    box-shadow:
+      0px 1px 2px -2px rgba(52, 64, 84, 0.08),
+      0px 1px 3px -1px rgba(52, 64, 84, 0.08);
+  }
+
+  .shadow-movie-card {
+    box-shadow:
+      0px 2px 4px -2px rgba(52, 64, 84, 0.08),
+      0px 4px 6px -1px rgba(52, 64, 84, 0.08);
+  }
+}

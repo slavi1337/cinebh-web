@@ -1,0 +1,1 @@
+export const MOVIE_SEARCH_MAX_LENGTH = 200;
