@@ -12,21 +12,15 @@ pipeline {
             }
         }
 
-        stage('Push to Registry') {
-            steps {
-                sh '''
-                    docker tag cinebh-frontend:latest ${EC2_HOST}:5000/cinebh-frontend:latest
-                    docker push ${EC2_HOST}:5000/cinebh-frontend:latest
-                '''
-            }
-        }
-
         stage('Deploy') {
             steps {
                 sh '''
+                    docker save cinebh-frontend:latest | gzip > cinebh-frontend.tar.gz
+                    scp -i /var/lib/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=no \
+                        cinebh-frontend.tar.gz ec2-user@${EC2_HOST}:/home/ec2-user/
                     ssh -i /var/lib/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=no ec2-user@${EC2_HOST} "
+                        docker load < /home/ec2-user/cinebh-frontend.tar.gz
                         cd /home/ec2-user
-                        docker-compose pull frontend
                         docker-compose up -d frontend
                         docker-compose ps
                     "
