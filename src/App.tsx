@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
+import BookingIntentRedirect from "@/components/booking/BookingIntentRedirect";
 import MainLayout from "@/components/layout/MainLayout";
 import AboutUsPage from "@/pages/AboutUsPage";
 import CurrentlyShowingPage from "@/pages/CurrentlyShowingPage";
@@ -7,6 +8,7 @@ import HomePage from "@/pages/HomePage";
 import PricingPage from "@/pages/PricingPage";
 import UpcomingMoviesPage from "@/pages/UpcomingMoviesPage";
 import MovieDetailsPage from "@/pages/MovieDetailsPage";
+import SeatSelectionPage from "@/pages/SeatSelectionPage";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 
 const VenuesPage = () => <div>Venues</div>;
@@ -16,6 +18,7 @@ export default function App() {
     <BrowserRouter>
       <ScrollToTop />
       <AuthProvider>
+        <BookingIntentRedirect />
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
@@ -29,6 +32,10 @@ export default function App() {
             />
             <Route path="/upcoming" element={<UpcomingMoviesPage />} />
             <Route path="/movies/:movieId" element={<MovieDetailsPage />} />
+            <Route
+              path="/movies/:movieId/seats"
+              element={<SeatSelectionPage />}
+            />
             <Route path="/venues" element={<VenuesPage />} />
           </Route>
         </Routes>

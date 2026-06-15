@@ -15,6 +15,17 @@ export const API_ENDPOINTS = {
     details: (movieId: string) => `/movies/${movieId}/details`,
     projections: (movieId: string) => `/movies/${movieId}/projections`,
   },
+  projections: {
+    seatMap: (projectionId: string) => `/projections/${projectionId}/seat-map`,
+  },
+  bookings: {
+    holds: "/bookings/holds",
+    hold: (bookingId: string) => `/bookings/holds/${bookingId}`,
+  },
+  websocket: {
+    projectionSeats: (projectionId: string) =>
+      `/ws/projections/${projectionId}/seats`,
+  },
   currentlyShowing: {
     list: "/currently-showing",
     filters: "/currently-showing/filters",
