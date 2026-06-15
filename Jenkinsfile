@@ -21,8 +21,9 @@ pipeline {
                     ssh -i /var/lib/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=no ec2-user@${EC2_HOST} "
                         docker load < /home/ec2-user/cinebh-frontend.tar.gz
                         cd /home/ec2-user
-                        docker-compose up -d frontend
+                        docker-compose up -d --no-deps frontend
                         docker-compose ps
+                        sudo systemctl restart nginx
                     "
                 '''
             }
