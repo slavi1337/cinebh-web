@@ -1,121 +1,24 @@
 pipeline {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright:v1.59.1-noble'
-            args '--ipc=host --shm-size=2g'
-        }
-    }
-
-    triggers {
-        cron('0 9 * * *')
-    }
+    agent any
 
     environment {
-        HOME = '/tmp'
-        CI = 'true'
-
-        FRONTEND_BASE_URL = 'https://cinebhapp.praksa.abhapp.com'
-        API_BASE_URL = 'https://cinebhapp.praksa.abhapp.com/api/v1'
-
-        LOGIN_EMAIL = credentials('cinebh-login-email')
-        LOGIN_PASSWORD = credentials('cinebh-login-password')
+        EC2_HOST = '18.159.94.138'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Build Frontend') {
             steps {
-                git branch: 'feature/homepage-refactor-and-tags-for-tests',
-                    credentialsId: 'Amer-ABH',
-                    url: 'https://github.com/Civa24/CineBH-atlantbh-ui-api-automation.git'
+                sh 'docker build --build-arg VITE_API_BASE_URL=/api/v1 -t cinebh-frontend:latest .'
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Check Frontend URL') {
+        stage('Push to Registry') {
             steps {
                 sh '''
-                    echo "FRONTEND_BASE_URL is: $FRONTEND_BASE_URL"
-                    curl -k -I "$FRONTEND_BASE_URL" || true
+                    docker tag cinebh-frontend:latest ${EC2_HOST}:5000/cinebh-frontend:latest
+                    docker push ${EC2_HOST}:5000/cinebh-frontend:latest
                 '''
             }
-        }
-
-        stage('Run UI Tests Including Known Bugs') {
-            steps {
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh 'xvfb-run -a npm run test:ui'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            archiveArtifacts artifacts: 'test-results/**, playwright-report/**, allure-results/**', allowEmptyArchive: true
-        }
-
-        success {
-            emailext(
-                to: 'amercivic6c@gmail.com',
-                subject: "SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                UI tests finished successfully.
-
-                Job: ${env.JOB_NAME}
-                Build number: ${env.BUILD_NUMBER}
-                Status: SUCCESS
-
-                Build URL:
-                ${env.BUILD_URL}
-                """
-            )
-        }
-
-        unstable {
-            emailext(
-                to: 'amercivic6c@gmail.com',
-                subject: "UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                UI tests finished with unstable status.
-
-                This can happen because known bug scenarios are included in this job.
-
-                Job: ${env.JOB_NAME}
-                Build number: ${env.BUILD_NUMBER}
-                Status: UNSTABLE
-
-                Check the console output and archived reports.
-
-                Build URL:
-                ${env.BUILD_URL}
-                """,
-                attachLog: true
-            )
-        }
-
-        failure {
-            emailext(
-                to: 'amercivic6c@gmail.com',
-                subject: "FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                UI tests pipeline failed.
-
-                Job: ${env.JOB_NAME}
-                Build number: ${env.BUILD_NUMBER}
-                Status: FAILED
-
-                Please check the console output.
-
-                Build URL:
-                ${env.BUILD_URL}
-                """,
-                attachLog: true
-            )
         }
     }
 }
