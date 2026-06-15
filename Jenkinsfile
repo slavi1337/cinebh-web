@@ -20,5 +20,18 @@ pipeline {
                 '''
             }
         }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    ssh -i /var/lib/jenkins/.ssh/id_ed25519 -o StrictHostKeyChecking=no ec2-user@${EC2_HOST} "
+                        cd /home/ec2-user
+                        docker-compose pull frontend
+                        docker-compose up -d frontend
+                        docker-compose ps
+                    "
+                '''
+            }
+        }
     }
 }
