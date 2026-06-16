@@ -22,6 +22,12 @@ export const API_ENDPOINTS = {
     holds: "/bookings/holds",
     hold: (bookingId: string) => `/bookings/holds/${bookingId}`,
   },
+  payments: {
+    checkoutSessions: "/payments/checkout-sessions",
+  },
+  tickets: {
+    validate: (ticketCode: string) => `/tickets/${ticketCode}`,
+  },
   websocket: {
     projectionSeats: (projectionId: string) =>
       `/ws/projections/${projectionId}/seats`,

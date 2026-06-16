@@ -3,12 +3,14 @@ import { AuthProvider } from "@/context/AuthContext";
 import BookingIntentRedirect from "@/components/booking/BookingIntentRedirect";
 import MainLayout from "@/components/layout/MainLayout";
 import AboutUsPage from "@/pages/AboutUsPage";
+import CheckoutSuccessPage from "@/pages/CheckoutSuccessPage";
 import CurrentlyShowingPage from "@/pages/CurrentlyShowingPage";
 import HomePage from "@/pages/HomePage";
 import PricingPage from "@/pages/PricingPage";
 import UpcomingMoviesPage from "@/pages/UpcomingMoviesPage";
 import MovieDetailsPage from "@/pages/MovieDetailsPage";
 import SeatSelectionPage from "@/pages/SeatSelectionPage";
+import TicketConfirmationPage from "@/pages/TicketConfirmationPage";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 
 const VenuesPage = () => <div>Venues</div>;
@@ -35,6 +37,11 @@ export default function App() {
             <Route
               path="/movies/:movieId/seats"
               element={<SeatSelectionPage />}
+            />
+            <Route path="/checkout/success" element={<CheckoutSuccessPage />} />
+            <Route
+              path="/tickets/confirmation"
+              element={<TicketConfirmationPage />}
             />
             <Route path="/venues" element={<VenuesPage />} />
           </Route>

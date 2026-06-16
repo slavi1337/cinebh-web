@@ -1,8 +1,8 @@
 import axios from "axios";
+import { getApiBaseUrl } from "@/constants/apiConfig";
 
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_BASE_URL ?? "https://api.cinebh.com:8443/api/v1",
+  baseURL: getApiBaseUrl(),
   withCredentials: true,
 });
 

@@ -1,6 +1,18 @@
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import BookingSummary from "@/components/booking/BookingSummary";
 import SeatGrid from "@/components/booking/SeatGrid";
 import SessionTimer from "@/components/booking/SessionTimer";
@@ -9,6 +21,7 @@ import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
 import { useAuth } from "@/context/AuthContext";
 import {
   cancelBookingHold,
+  createCheckoutSession,
   getProjectionSeatWebSocketUrl,
   getProjectionSeatMap,
   holdBookingSeats,
@@ -62,13 +75,25 @@ type ProjectionSeatWebSocketEvent = {
   projectionId: string;
 };
 
+function SeatSelectionPageLayout({ children }: { children: ReactNode }) {
+  return (
+    <main className="min-h-screen bg-page-background">
+      <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
+        {children}
+      </div>
+    </main>
+  );
+}
+
 export default function SeatSelectionPage() {
   const { movieId } = useParams();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, openSignIn, showToast } = useAuth();
   const projectionId = searchParams.get("projectionId") ?? "";
   const mode = getMode(searchParams.get("mode"));
+  const paymentStatus = searchParams.get("payment");
   const [seatMap, setSeatMap] = useState<SeatMap | null>(null);
   const [hold, setHold] = useState<BookingHold | null>(null);
   const [selectedSeatIds, setSelectedSeatIds] = useState<Set<string>>(
@@ -181,6 +206,27 @@ export default function SeatSelectionPage() {
     seatMap,
     startEmptyHold,
   ]);
+
+  useEffect(() => {
+    if (paymentStatus !== "cancelled") {
+      return;
+    }
+
+    showToast(
+      "Payment was cancelled. Your seat hold is still active until the timer expires.",
+      "error",
+    );
+
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete("payment");
+    navigate(
+      {
+        pathname: location.pathname,
+        search: nextSearchParams.toString(),
+      },
+      { replace: true },
+    );
+  }, [location.pathname, navigate, paymentStatus, searchParams, showToast]);
 
   useEffect(() => {
     if (!currentUser || !projectionId) {
@@ -319,99 +365,118 @@ export default function SeatSelectionPage() {
     }
   }
 
-  function handleNextPhaseAction() {
-    showToast(
-      mode === "reserve"
-        ? "Reservation finalization will be implemented in the next phase."
-        : "Stripe checkout will be implemented in the next phase.",
-    );
+  async function handleNextPhaseAction() {
+    if (mode === "reserve") {
+      showToast(
+        "Reservation finalization will be implemented in the next phase.",
+      );
+      return;
+    }
+
+    if (!hold || selectedSeats.length === 0) {
+      showToast("Select at least one seat before checkout.", "error");
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      const response = await createCheckoutSession({
+        bookingId: hold.bookingId,
+      });
+
+      if (!response.sessionUrl) {
+        showToast("Checkout session URL was not returned.", "error");
+        return;
+      }
+
+      window.location.assign(response.sessionUrl);
+    } catch (error) {
+      showToast(getApiErrorMessage(error), "error");
+      await loadSeatMap(false);
+    } finally {
+      setIsUpdating(false);
+    }
   }
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-page-background">
-        <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
-          <PageStatusCard label="Loading seat map..." />
-        </div>
-      </main>
+      <SeatSelectionPageLayout>
+        <PageStatusCard label="Loading seat map..." />
+      </SeatSelectionPageLayout>
     );
   }
 
   if (errorMessage || !seatMap) {
     return (
-      <main className="min-h-screen bg-page-background">
-        <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
-          <PageStatusCard label={errorMessage || "Seat map was not found."} />
-        </div>
-      </main>
+      <SeatSelectionPageLayout>
+        <PageStatusCard label={errorMessage || "Seat map was not found."} />
+      </SeatSelectionPageLayout>
     );
   }
 
   return (
-    <main className="min-h-screen bg-page-background">
-      <div className="mx-auto w-full max-w-360 px-4 pt-12 pb-20 md:px-8 lg:px-23">
-        <button
-          type="button"
-          onClick={handleCancelHold}
-          className="text-body-md font-semibold text-brand-red"
-        >
-          Back to Movie Details
-        </button>
+    <SeatSelectionPageLayout>
+      <button
+        type="button"
+        onClick={handleCancelHold}
+        className="text-body-md font-semibold text-brand-red"
+      >
+        Back to Movie Details
+      </button>
 
-        <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[14px] leading-5 font-semibold tracking-[0.1em] text-brand-red uppercase">
-              Seat Options
-            </p>
-            <h1 className="mt-2 text-[32px] leading-10 font-bold tracking-[-0.0015em] text-page-heading">
-              {seatMap.movieTitle}
-            </h1>
-            <p className="mt-2 text-body-md text-page-muted">
-              {seatMap.venueName}, {seatMap.cityName} - {seatMap.hallName} -{" "}
-              {formatProjectionDateTime(seatMap.startTime)}
-            </p>
-          </div>
-          <SessionTimer
-            expiresAt={hold?.expiresAt}
-            onExpired={handleSessionExpired}
-          />
+      <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[14px] leading-5 font-semibold tracking-[0.1em] text-brand-red uppercase">
+            Seat Options
+          </p>
+          <h1 className="mt-2 text-[32px] leading-10 font-bold tracking-[-0.0015em] text-page-heading">
+            {seatMap.movieTitle}
+          </h1>
+          <p className="mt-2 text-body-md text-page-muted">
+            {seatMap.venueName}, {seatMap.cityName} - {seatMap.hallName} -{" "}
+            {formatProjectionDateTime(seatMap.startTime)}
+          </p>
         </div>
-
-        {isSessionExpired && (
-          <div className="mt-6 rounded-2xl border border-brand-red/30 bg-brand-red/10 p-4 text-body-md text-brand-red">
-            Your seat selection session expired. Start a new session to choose
-            seats again.
-            <button
-              type="button"
-              onClick={handleStartNewSession}
-              className="ml-3 font-bold underline"
-            >
-              Start new session
-            </button>
-          </div>
-        )}
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
-          <SeatGrid
-            seats={seatMap.seats}
-            selectedSeatIds={selectedSeatIds}
-            isUpdating={isUpdating || isSessionExpired}
-            onToggleSeat={handleToggleSeat}
-          />
-          <BookingSummary
-            seats={selectedSeats}
-            totalPrice={totalPrice}
-            actionLabel={
-              mode === "reserve"
-                ? "Make Reservation (coming next)"
-                : "Continue to Payment (coming next)"
-            }
-            isActionDisabled={selectedSeats.length === 0 || isSessionExpired}
-            isUpdating={isUpdating}
-            onAction={handleNextPhaseAction}
-          />
-        </div>
+        <SessionTimer
+          expiresAt={hold?.expiresAt}
+          onExpired={handleSessionExpired}
+        />
       </div>
-    </main>
+
+      {isSessionExpired && (
+        <div className="mt-6 rounded-2xl border border-brand-red/30 bg-brand-red/10 p-4 text-body-md text-brand-red">
+          Your seat selection session expired. Start a new session to choose
+          seats again.
+          <button
+            type="button"
+            onClick={handleStartNewSession}
+            className="ml-3 font-bold underline"
+          >
+            Start new session
+          </button>
+        </div>
+      )}
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+        <SeatGrid
+          seats={seatMap.seats}
+          selectedSeatIds={selectedSeatIds}
+          isUpdating={isUpdating || isSessionExpired}
+          onToggleSeat={handleToggleSeat}
+        />
+        <BookingSummary
+          seats={selectedSeats}
+          totalPrice={totalPrice}
+          actionLabel={
+            mode === "reserve"
+              ? "Make Reservation (coming next)"
+              : "Continue to Payment"
+          }
+          isActionDisabled={selectedSeats.length === 0 || isSessionExpired}
+          isUpdating={isUpdating}
+          onAction={handleNextPhaseAction}
+        />
+      </div>
+    </SeatSelectionPageLayout>
   );
 }

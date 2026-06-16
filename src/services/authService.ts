@@ -1,5 +1,6 @@
 import api from "@/services/api";
 import { API_ENDPOINTS } from "@/constants/apiEndpoints";
+import { getConfiguredApiBaseUrl } from "@/constants/apiConfig";
 import type {
   AuthUser,
   LoginRequest,
@@ -13,7 +14,7 @@ export async function loginUser(request: LoginRequest): Promise<AuthUser> {
 }
 
 export function loginWithGoogle() {
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  const apiBaseUrl = getConfiguredApiBaseUrl();
 
   if (!apiBaseUrl) {
     window.location.href = API_ENDPOINTS.auth.googleOAuth;

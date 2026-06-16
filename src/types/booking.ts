@@ -46,6 +46,14 @@ export type BookingHoldRequest = {
   seatTemplateIds: string[];
 };
 
+export type CheckoutSessionRequest = {
+  bookingId: string;
+};
+
+export type CheckoutSessionResponse = {
+  sessionUrl: string;
+};
+
 export type BookingMode = "buy" | "reserve";
 
 export type BookingIntent = {
