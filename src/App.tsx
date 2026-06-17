@@ -6,6 +6,7 @@ import AboutUsPage from "@/pages/AboutUsPage";
 import CheckoutSuccessPage from "@/pages/CheckoutSuccessPage";
 import CurrentlyShowingPage from "@/pages/CurrentlyShowingPage";
 import HomePage from "@/pages/HomePage";
+import ProfileReservationsPage from "@/pages/ProfileReservationsPage";
 import PricingPage from "@/pages/PricingPage";
 import UpcomingMoviesPage from "@/pages/UpcomingMoviesPage";
 import MovieDetailsPage from "@/pages/MovieDetailsPage";
@@ -42,6 +43,10 @@ export default function App() {
             <Route
               path="/tickets/confirmation"
               element={<TicketConfirmationPage />}
+            />
+            <Route
+              path="/profile/reservations"
+              element={<ProfileReservationsPage />}
             />
             <Route path="/venues" element={<VenuesPage />} />
           </Route>

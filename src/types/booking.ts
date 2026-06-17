@@ -32,6 +32,10 @@ export type SeatMap = {
   projectionId: string;
   movieId: string;
   movieTitle: string;
+  posterImageUrl: string | null;
+  pgRating: string | null;
+  language: string | null;
+  durationMinutes: number | null;
   cityName: string;
   venueName: string;
   hallName: string;
@@ -52,6 +56,24 @@ export type CheckoutSessionRequest = {
 
 export type CheckoutSessionResponse = {
   sessionUrl: string;
+};
+
+export type Reservation = {
+  bookingId: string;
+  movieId: string;
+  projectionId: string;
+  movieTitle: string;
+  posterImageUrl: string | null;
+  pgRating: string | null;
+  language: string | null;
+  durationMinutes: number | null;
+  cityName: string;
+  venueName: string;
+  hallName: string;
+  projectionStartTime: string;
+  expiresAt: string;
+  totalPrice: number;
+  seats: SelectedSeat[];
 };
 
 export type BookingMode = "buy" | "reserve";

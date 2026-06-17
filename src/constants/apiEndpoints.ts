@@ -21,6 +21,9 @@ export const API_ENDPOINTS = {
   bookings: {
     holds: "/bookings/holds",
     hold: (bookingId: string) => `/bookings/holds/${bookingId}`,
+    reserveHold: (bookingId: string) => `/bookings/holds/${bookingId}/reserve`,
+    reservations: "/bookings/reservations",
+    reservation: (bookingId: string) => `/bookings/reservations/${bookingId}`,
   },
   payments: {
     checkoutSessions: "/payments/checkout-sessions",
