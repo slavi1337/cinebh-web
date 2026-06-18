@@ -31,6 +31,13 @@ export const API_ENDPOINTS = {
   tickets: {
     validate: (ticketCode: string) => `/tickets/${ticketCode}`,
   },
+  users: {
+    profile: "/users/me/profile",
+    profileImage: "/users/me/profile-image",
+    profileOptions: "/users/me/profile/options",
+    password: "/users/me/password",
+    projections: "/users/me/projections",
+  },
   websocket: {
     projectionSeats: (projectionId: string) =>
       `/ws/projections/${projectionId}/seats`,

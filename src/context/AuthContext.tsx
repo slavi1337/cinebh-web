@@ -50,6 +50,7 @@ type AuthContextValue = {
   verify: (request: VerifyAccountRequest) => Promise<void>;
   resendVerificationCode: () => Promise<void>;
   logout: () => Promise<void>;
+  refreshCurrentUser: () => Promise<void>;
 };
 
 const AUTH_USER_KEY = "cinebh.auth.user";
@@ -244,6 +245,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
           throw error;
         }
+      },
+      refreshCurrentUser: async () => {
+        const user = await getCurrentUser();
+        persistUser(user, Boolean(localStorage.getItem(AUTH_USER_KEY)));
+        setCurrentUser(user);
       },
       logout: async () => {
         try {

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import BookingIntentRedirect from "@/components/booking/BookingIntentRedirect";
 import MainLayout from "@/components/layout/MainLayout";
@@ -6,6 +6,9 @@ import AboutUsPage from "@/pages/AboutUsPage";
 import CheckoutSuccessPage from "@/pages/CheckoutSuccessPage";
 import CurrentlyShowingPage from "@/pages/CurrentlyShowingPage";
 import HomePage from "@/pages/HomePage";
+import ProfilePasswordPage from "@/pages/ProfilePasswordPage";
+import ProfilePersonalInformationPage from "@/pages/ProfilePersonalInformationPage";
+import ProfileProjectionsPage from "@/pages/ProfileProjectionsPage";
 import ProfileReservationsPage from "@/pages/ProfileReservationsPage";
 import PricingPage from "@/pages/PricingPage";
 import UpcomingMoviesPage from "@/pages/UpcomingMoviesPage";
@@ -45,8 +48,21 @@ export default function App() {
               element={<TicketConfirmationPage />}
             />
             <Route
+              path="/profile"
+              element={<Navigate to="/profile/personal-information" replace />}
+            />
+            <Route
+              path="/profile/personal-information"
+              element={<ProfilePersonalInformationPage />}
+            />
+            <Route path="/profile/password" element={<ProfilePasswordPage />} />
+            <Route
               path="/profile/reservations"
               element={<ProfileReservationsPage />}
+            />
+            <Route
+              path="/profile/projections"
+              element={<ProfileProjectionsPage />}
             />
             <Route path="/venues" element={<VenuesPage />} />
           </Route>

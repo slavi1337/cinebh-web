@@ -1,4 +1,5 @@
 import type { Seat } from "@/types/booking";
+import VipSeatIcon from "@/components/booking/VipSeatIcon";
 
 type SeatGridProps = {
   seats: Seat[];
@@ -34,10 +35,19 @@ function getSeatButtonClass(seat: Seat, isSelected: boolean) {
   return "border-movie-details-border bg-white text-page-heading hover:border-brand-red/70";
 }
 
-function getSeatLabel(seat: Seat) {
+function SeatLabel({ seat }: { seat: Seat }) {
   const label = `${seat.row}${seat.number}`;
 
-  return seat.type === "VIP" ? `* ${label}` : label;
+  if (seat.type !== "VIP") {
+    return label;
+  }
+
+  return (
+    <span className="flex items-center justify-center gap-0.5">
+      <VipSeatIcon />
+      <span>{label}</span>
+    </span>
+  );
 }
 
 export default function SeatGrid({
@@ -90,7 +100,7 @@ export default function SeatGrid({
                       )}`}
                       title={`${seat.row}${seat.number} - ${SEAT_TYPE_LABELS[seat.type]}`}
                     >
-                      {getSeatLabel(seat)}
+                      <SeatLabel seat={seat} />
                     </button>
                   );
                 })}

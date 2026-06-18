@@ -1,191 +1,20 @@
 import axios from "axios";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import SessionTimer from "@/components/booking/SessionTimer";
 import PageStatusCard from "@/components/common/PageStatusCard";
-import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
+import ProfileBookingDetails from "@/components/profile/ProfileBookingDetails";
+import ProfileLayout from "@/components/profile/ProfileLayout";
+import ProfileMoviePosterLink from "@/components/profile/ProfileMoviePosterLink";
+import ProfileSeatDetails from "@/components/profile/ProfileSeatDetails";
 import { useAuth } from "@/context/AuthContext";
 import {
   cancelReservation,
   createCheckoutSession,
   getReservations,
 } from "@/services/bookingService";
-import type { Reservation, SelectedSeat } from "@/types/booking";
+import type { Reservation } from "@/types/booking";
 import { getApiErrorMessage } from "@/utils/auth";
-
-type ProfileLayoutProps = {
-  reservationCount: number;
-  children: ReactNode;
-};
-
-function formatDateTime(value: string) {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  const dateLabel = date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  });
-  const timeLabel = date.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-  return `${dateLabel} at ${timeLabel}`;
-}
-
-function formatAmount(value: number) {
-  return `${Number(value).toFixed(2)} BAM`;
-}
-
-function formatDuration(durationMinutes: number | null) {
-  return durationMinutes ? `${durationMinutes} Min` : null;
-}
-
-function seatLabel(seat: SelectedSeat) {
-  return `${seat.row}${seat.number}`;
-}
-
-function SidebarIcon({ children }: { children: ReactNode }) {
-  return (
-    <span className="flex h-4 w-4 shrink-0 items-center justify-center text-current">
-      {children}
-    </span>
-  );
-}
-
-function ProfileSidebar({ reservationCount }: { reservationCount: number }) {
-  return (
-    <aside className="bg-navbar-background px-4 py-6 text-white lg:min-h-[calc(100vh-80px)] lg:w-65 lg:px-8 lg:py-8">
-      <h2 className="text-[24px] leading-8 font-bold tracking-[-0.0015em]">
-        User Profile
-      </h2>
-
-      <nav className="mt-8 flex gap-6 overflow-x-auto pb-2 lg:block lg:space-y-7 lg:overflow-visible lg:pb-0">
-        <div className="min-w-48 lg:min-w-0">
-          <div className="mb-4 flex items-center gap-3 text-[12px] leading-4 text-auth-text-muted">
-            <span>General</span>
-            <span className="h-px flex-1 bg-navbar-border" />
-          </div>
-          <div className="space-y-4 text-body-md text-auth-text-muted">
-            <span className="flex items-center gap-2 whitespace-nowrap">
-              <SidebarIcon>
-                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5 6a5 5 0 0 0-10 0"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </SidebarIcon>
-              Personal Information
-            </span>
-            <span className="flex items-center gap-2 whitespace-nowrap">
-              <SidebarIcon>
-                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M4 7V5a4 4 0 0 1 8 0v2m-8 0h8v7H4V7Z"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </SidebarIcon>
-              Password
-            </span>
-          </div>
-        </div>
-
-        <div className="min-w-58 lg:min-w-0">
-          <div className="mb-4 flex items-center gap-3 text-[12px] leading-4 text-auth-text-muted">
-            <span>Movies</span>
-            <span className="h-px flex-1 bg-navbar-border" />
-          </div>
-          <div className="space-y-4 text-body-md">
-            <span className="flex items-center gap-2 whitespace-nowrap font-semibold text-white">
-              <SidebarIcon>
-                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle
-                    cx="8"
-                    cy="8"
-                    r="5.5"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                  />
-                  <path
-                    d="M8 4.5V8l2 1.5"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </SidebarIcon>
-              Pending Reservations ({reservationCount})
-            </span>
-            <span className="flex items-center gap-2 whitespace-nowrap text-auth-text-muted">
-              <SidebarIcon>
-                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path
-                    d="M3 4h10v9H3V4Zm0 3h10M6 4v9m4-9v9"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </SidebarIcon>
-              Projections
-            </span>
-          </div>
-        </div>
-      </nav>
-    </aside>
-  );
-}
-
-function ProfileLayout({ reservationCount, children }: ProfileLayoutProps) {
-  return (
-    <div className="min-h-[calc(100vh-80px)] bg-page-background">
-      <div className="flex w-full flex-col lg:flex-row">
-        <ProfileSidebar reservationCount={reservationCount} />
-        <section className="min-w-0 flex-1 px-4 py-8 md:px-8 lg:px-8">
-          <div className="mx-auto w-full max-w-[1120px]">
-            {children}
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-function MovieMeta({ reservation }: { reservation: Reservation }) {
-  const metaItems = [
-    reservation.pgRating,
-    reservation.language,
-    formatDuration(reservation.durationMinutes),
-  ].filter(Boolean);
-
-  if (metaItems.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] leading-5 text-page-muted">
-      {metaItems.map((item, index) => (
-        <span key={item} className="flex items-center gap-3">
-          {index > 0 ? <span className="h-5 w-px bg-brand-red" /> : null}
-          {item}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function ReservationTimer({
   reservation,
@@ -231,58 +60,32 @@ function ReservationCard({
   return (
     <article className="rounded-2xl border border-border-default bg-white p-4 shadow-page-input md:p-5">
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-        <h2 className="text-[20px] leading-6 font-bold tracking-[-0.0015em] text-page-heading">
+        <h2 className="text-[18px] leading-6 font-bold tracking-[-0.0015em] text-page-heading">
           {reservation.movieTitle}
         </h2>
         <ReservationTimer reservation={reservation} onExpired={onExpired} />
       </div>
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[116px_minmax(0,1fr)_minmax(220px,0.7fr)_160px] lg:items-start">
-        <Link
-          to={`/movies/${reservation.movieId}`}
-          className="block h-28 w-28 overflow-hidden rounded-2xl bg-movie-details-chip-background"
-        >
-          <img
-            src={reservation.posterImageUrl || moviePosterPlaceholder}
-            alt={reservation.movieTitle}
-            className="h-full w-full object-cover"
-          />
-        </Link>
-
-        <div>
-          <h3 className="text-body-md font-bold text-page-muted">
-            Booking Details
-          </h3>
-          <p className="mt-4 text-body-md text-page-heading">
-            {formatDateTime(reservation.projectionStartTime)}
-          </p>
-          <p className="mt-4 text-body-md text-page-heading">
-            {reservation.venueName}, {reservation.cityName}
-          </p>
-          <MovieMeta reservation={reservation} />
-        </div>
-
-        <div>
-          <h3 className="text-body-md font-bold text-page-muted">
-            Seat(s) Details
-          </h3>
-          <p className="mt-4 text-body-md text-page-heading">
-            <span className="text-page-muted">Seat(s): </span>
-            <span className="font-semibold">
-              {reservation.seats.map(seatLabel).join(", ")}
-            </span>
-          </p>
-          <p className="mt-4 text-body-md text-page-heading">
-            <span className="text-page-muted">Hall: </span>
-            <span className="font-semibold">{reservation.hallName}</span>
-          </p>
-          <p className="mt-4 text-body-md text-page-heading">
-            <span className="text-page-muted">Total Price: </span>
-            <span className="font-semibold">
-              {formatAmount(reservation.totalPrice)}
-            </span>
-          </p>
-        </div>
+        <ProfileMoviePosterLink
+          movieId={reservation.movieId}
+          movieTitle={reservation.movieTitle}
+          posterImageUrl={reservation.posterImageUrl}
+        />
+        <ProfileBookingDetails
+          startTime={reservation.projectionStartTime}
+          venueName={reservation.venueName}
+          cityName={reservation.cityName}
+          pgRating={reservation.pgRating}
+          language={reservation.language}
+          durationMinutes={reservation.durationMinutes}
+        />
+        <ProfileSeatDetails
+          title="Seat(s) Details"
+          seats={reservation.seats}
+          hallName={reservation.hallName}
+          totalPrice={reservation.totalPrice}
+        />
 
         <div className="flex flex-col gap-3 lg:pt-1">
           <button
@@ -468,9 +271,21 @@ export default function ProfileReservationsPage() {
     );
   }
 
+  const headerAction = (
+    <Link
+      to="/currently-showing"
+      className="inline-flex h-11 items-center justify-center rounded-lg border border-border-default px-5 text-body-md font-semibold text-page-heading transition hover:border-brand-red hover:text-brand-red"
+    >
+      Browse Movies
+    </Link>
+  );
+
   if (isLoading) {
     return (
-      <ProfileLayout reservationCount={reservations.length}>
+      <ProfileLayout
+        title="Pending Reservations"
+        reservationCount={reservations.length}
+      >
         <PageStatusCard label="Loading reservations..." />
       </ProfileLayout>
     );
@@ -478,32 +293,25 @@ export default function ProfileReservationsPage() {
 
   if (errorMessage) {
     return (
-      <ProfileLayout reservationCount={reservations.length}>
+      <ProfileLayout
+        title="Pending Reservations"
+        reservationCount={reservations.length}
+      >
         <PageStatusCard label={errorMessage} />
       </ProfileLayout>
     );
   }
 
   return (
-    <ProfileLayout reservationCount={reservations.length}>
-      <div className="flex flex-col gap-3 border-b border-border-default pb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-[24px] leading-8 font-bold tracking-[-0.0015em] text-page-heading">
-          Pending Reservations
-        </h1>
-        <Link
-          to="/currently-showing"
-          className="inline-flex h-11 items-center justify-center rounded-lg border border-border-default px-5 text-body-md font-semibold text-page-heading transition hover:border-brand-red hover:text-brand-red"
-        >
-          Browse Movies
-        </Link>
-      </div>
-
+    <ProfileLayout
+      title="Pending Reservations"
+      reservationCount={reservations.length}
+      headerAction={headerAction}
+    >
       {reservations.length === 0 ? (
-        <div className="mt-6">
-          <PageStatusCard label="You do not have active reservations." />
-        </div>
+        <PageStatusCard label="You do not have active reservations." />
       ) : (
-        <div className="mt-6 grid gap-5">
+        <div className="grid gap-5">
           {reservations.map((reservation) => (
             <ReservationCard
               key={reservation.bookingId}

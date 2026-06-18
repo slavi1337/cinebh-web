@@ -74,14 +74,14 @@ export default function NavbarAuthAction({
           className="absolute right-0 top-14 z-[80] w-48 rounded-lg border border-border-default bg-white p-2 shadow-movie-card"
         >
           <Link
-            to="/profile/reservations"
+            to="/profile"
             onClick={() => {
               setIsMenuOpen(false);
               onActionComplete?.();
             }}
             className="block w-full rounded-md px-3 py-2 text-left text-body-md font-semibold text-page-heading hover:bg-page-background"
           >
-            Reservations
+            Profile
           </Link>
           <button
             type="button"
