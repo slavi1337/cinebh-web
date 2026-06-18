@@ -15,7 +15,9 @@ const SEAT_TYPE_LABELS = {
 
 function groupSeatsByRow(seats: Seat[]) {
   return seats.reduce<Record<string, Seat[]>>((rows, seat) => {
-    rows[seat.row] = [...(rows[seat.row] ?? []), seat];
+    const rowSeats = rows[seat.row] ?? [];
+    rowSeats.push(seat);
+    rows[seat.row] = rowSeats;
     return rows;
   }, {});
 }

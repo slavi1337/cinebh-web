@@ -1,9 +1,10 @@
 const DEFAULT_API_BASE_URL = "https://api.cinebh.com:8443/api/v1";
+const CONFIGURED_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() ?? "";
 
 export function getApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL;
+  return CONFIGURED_API_BASE_URL || DEFAULT_API_BASE_URL;
 }
 
 export function getConfiguredApiBaseUrl() {
-  return import.meta.env.VITE_API_BASE_URL?.trim() ?? "";
+  return CONFIGURED_API_BASE_URL;
 }
