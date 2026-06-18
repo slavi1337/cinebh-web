@@ -15,10 +15,12 @@ type MovieScheduleCardProps = {
   selectedDate: string;
   selectedCityId: string;
   selectedVenueId: string;
+  selectedProjectionId: string;
   projections: MovieProjection[];
   onDateChange: (date: string) => void;
   onCityChange: (cityId: string) => void;
   onVenueChange: (venueId: string) => void;
+  onProjectionChange: (projectionId: string) => void;
   onTicketAction: (projectionId: string, mode: BookingMode) => void;
   onExpiredProjectionSelect: () => void;
 };
@@ -54,10 +56,12 @@ export default function MovieScheduleCard({
   selectedDate,
   selectedCityId,
   selectedVenueId,
+  selectedProjectionId,
   projections,
   onDateChange,
   onCityChange,
   onVenueChange,
+  onProjectionChange,
   onTicketAction,
   onExpiredProjectionSelect,
 }: MovieScheduleCardProps) {
@@ -76,6 +80,22 @@ export default function MovieScheduleCard({
   );
   const canGoBack = boundedDatePage > 0;
   const canGoForward = boundedDatePage + 1 < totalDatePages;
+  const selectedProjection = projections.find(
+    (projection) => projection.projectionId === selectedProjectionId,
+  );
+  const isSelectedProjectionPassed = selectedProjection
+    ? isProjectionTimePassed(selectedDate, selectedProjection.startTime)
+    : false;
+  const canStartTicketAction =
+    Boolean(selectedProjection) && !isSelectedProjectionPassed;
+
+  function handleProtectedAction(mode: BookingMode) {
+    if (!selectedProjection || !canStartTicketAction) {
+      return;
+    }
+
+    onTicketAction(selectedProjection.projectionId, mode);
+  }
 
   return (
     <section className="rounded-3xl border border-movie-details-border bg-movie-details-card-background shadow-[0px_8px_18px_rgba(52,64,84,0.08)]">
@@ -166,16 +186,35 @@ export default function MovieScheduleCard({
             <GroupedShowtimes
               showtimes={projections}
               emptyLabel="No projection times available for selected filters."
+              selectedProjectionId={selectedProjectionId}
               isShowtimeUnavailable={(projection) =>
                 isProjectionTimePassed(selectedDate, projection.startTime)
               }
               onUnavailableShowtimeClick={onExpiredProjectionSelect}
               onShowtimeClick={(projection) =>
-                onTicketAction(projection.projectionId, "buy")
+                onProjectionChange(projection.projectionId)
               }
             />
           </div>
         </div>
+      </div>
+      <div className="mt-12 grid gap-4 border-t border-movie-details-border p-5 md:grid-cols-2 md:p-6">
+        <button
+          type="button"
+          disabled={!canStartTicketAction}
+          onClick={() => handleProtectedAction("reserve")}
+          className="h-12 rounded-lg border border-brand-red bg-white text-body-md font-semibold text-brand-red transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:border-movie-details-border disabled:text-movie-details-border"
+        >
+          Reserve Ticket
+        </button>
+        <button
+          type="button"
+          disabled={!canStartTicketAction}
+          onClick={() => handleProtectedAction("buy")}
+          className="h-12 rounded-lg bg-brand-red text-body-md font-semibold text-white transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:bg-movie-details-border"
+        >
+          Buy Ticket
+        </button>
       </div>
     </section>
   );
