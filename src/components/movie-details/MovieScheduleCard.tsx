@@ -1,10 +1,10 @@
 import { useState } from "react";
 import FilterSelect from "@/components/common/FilterSelect";
+import GroupedShowtimes from "@/components/showtimes/GroupedShowtimes";
 import CinemaIcon from "@/components/ui/icons/CinemaIcon";
 import LeftArrowIcon from "@/components/ui/icons/LeftArrowIcon";
 import LocationPinIcon from "@/components/ui/icons/LocationPinIcon";
 import RightArrowIcon from "@/components/ui/icons/RightArrowIcon";
-import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
 import type { BookingMode } from "@/types/booking";
 import type { FilterOption } from "@/types/common";
 import type { MovieDetails, MovieProjection } from "@/types/movieDetails";
@@ -15,13 +15,11 @@ type MovieScheduleCardProps = {
   selectedDate: string;
   selectedCityId: string;
   selectedVenueId: string;
-  selectedProjectionId: string;
   projections: MovieProjection[];
   onDateChange: (date: string) => void;
   onCityChange: (cityId: string) => void;
   onVenueChange: (venueId: string) => void;
-  onProjectionChange: (projectionId: string) => void;
-  onTicketAction: (mode: BookingMode) => void;
+  onTicketAction: (projectionId: string, mode: BookingMode) => void;
   onExpiredProjectionSelect: () => void;
 };
 const DATE_PAGE_SIZE = 5;
@@ -50,22 +48,16 @@ function getDateLabel(date: string) {
         }),
   };
 }
-function formatProjectionTime(time: string) {
-  return time.slice(0, 5);
-}
-
 export default function MovieScheduleCard({
   movie,
   availableVenues,
   selectedDate,
   selectedCityId,
   selectedVenueId,
-  selectedProjectionId,
   projections,
   onDateChange,
   onCityChange,
   onVenueChange,
-  onProjectionChange,
   onTicketAction,
   onExpiredProjectionSelect,
 }: MovieScheduleCardProps) {
@@ -84,19 +76,7 @@ export default function MovieScheduleCard({
   );
   const canGoBack = boundedDatePage > 0;
   const canGoForward = boundedDatePage + 1 < totalDatePages;
-  const selectedProjection = projections.find(
-    (projection) => projection.projectionId === selectedProjectionId,
-  );
-  const isSelectedProjectionPassed = selectedProjection
-    ? isProjectionTimePassed(selectedDate, selectedProjection.startTime)
-    : false;
-  const canStartTicketAction =
-    Boolean(selectedProjection) && !isSelectedProjectionPassed;
-  function handleProtectedAction(mode: BookingMode) {
-    if (canStartTicketAction) {
-      onTicketAction(mode);
-    }
-  }
+
   return (
     <section className="rounded-3xl border border-movie-details-border bg-movie-details-card-background shadow-[0px_8px_18px_rgba(52,64,84,0.08)]">
       <div className="p-5 md:p-6">
@@ -180,85 +160,22 @@ export default function MovieScheduleCard({
         </div>
         <div className="mt-8">
           <h3 className="text-[20px] leading-6 font-bold tracking-[-0.0015em] text-movie-details-heading">
-            Standard
+            Showtimes
           </h3>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {projections.length ? (
-              projections.map((projection) => {
-                const isSelected =
-                  projection.projectionId === selectedProjectionId;
-                const isProjectionPassed = isProjectionTimePassed(
-                  selectedDate,
-                  projection.startTime,
-                );
-                return (
-                  <button
-                    key={projection.projectionId}
-                    type="button"
-                    onClick={() => {
-                      onProjectionChange(projection.projectionId);
-
-                      if (isProjectionPassed) {
-                        onExpiredProjectionSelect();
-                      }
-                    }}
-                    title={
-                      isProjectionPassed
-                        ? "This projection time has already passed."
-                        : undefined
-                    }
-                    className={`h-12 cursor-pointer rounded-lg border px-4 text-body-md font-bold shadow-page-input transition-colors ${
-                      isSelected
-                        ? isProjectionPassed
-                          ? "border-movie-details-border bg-movie-details-border text-white"
-                          : "border-brand-red bg-brand-red text-white"
-                        : isProjectionPassed
-                          ? "border-movie-details-border bg-white text-page-muted"
-                        : "border-movie-details-border bg-white text-movie-details-heading hover:border-brand-red/50"
-                    }`}
-                  >
-                    {formatProjectionTime(projection.startTime)}
-                  </button>
-                );
-              })
-            ) : (
-              <p className="text-body-md text-page-muted">
-                No projection times available for selected filters.
-              </p>
-            )}
+          <div className="mt-4">
+            <GroupedShowtimes
+              showtimes={projections}
+              emptyLabel="No projection times available for selected filters."
+              isShowtimeUnavailable={(projection) =>
+                isProjectionTimePassed(selectedDate, projection.startTime)
+              }
+              onUnavailableShowtimeClick={onExpiredProjectionSelect}
+              onShowtimeClick={(projection) =>
+                onTicketAction(projection.projectionId, "buy")
+              }
+            />
           </div>
-          {selectedProjection && (
-            <p className="mt-4 text-right text-[14px] leading-5 text-page-muted">
-              Selected cinema:{" "}
-              <span className="font-semibold text-page-heading">
-                {selectedProjection.venueName} ({selectedProjection.cityName})
-              </span>
-            </p>
-          )}
-          {isSelectedProjectionPassed && (
-            <p className="mt-3 text-right text-[14px] leading-5 font-semibold text-brand-red">
-              {EXPIRED_PROJECTION_MESSAGE}
-            </p>
-          )}
         </div>
-      </div>
-      <div className="mt-12 grid gap-4 border-t border-movie-details-border p-5 md:grid-cols-2 md:p-6">
-        <button
-          type="button"
-          disabled={!canStartTicketAction}
-          onClick={() => handleProtectedAction("reserve")}
-          className="h-12 rounded-lg border border-brand-red bg-white text-body-md font-semibold text-brand-red transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:border-movie-details-border disabled:text-movie-details-border"
-        >
-          Reserve Ticket
-        </button>
-        <button
-          type="button"
-          disabled={!canStartTicketAction}
-          onClick={() => handleProtectedAction("buy")}
-          className="h-12 rounded-lg bg-brand-red text-body-md font-semibold text-white transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:bg-movie-details-border"
-        >
-          Buy Ticket
-        </button>
       </div>
     </section>
   );

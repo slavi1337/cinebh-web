@@ -35,7 +35,6 @@ export default function MovieDetailsPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedCityId, setSelectedCityId] = useState("");
   const [selectedVenueId, setSelectedVenueId] = useState("");
-  const [selectedProjectionId, setSelectedProjectionId] = useState("");
   const [isLoadingMovie, setIsLoadingMovie] = useState(true);
   const [isLoadingProjections, setIsLoadingProjections] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -61,7 +60,6 @@ export default function MovieDetailsPage() {
 
     setSelectedCityId(movie.cities[0].id);
     setSelectedVenueId("");
-    setSelectedProjectionId("");
   }, [movie, selectedCityId]);
   useEffect(() => {
     if (!selectedCityId || selectedVenueId || availableVenues.length !== 1) {
@@ -69,7 +67,6 @@ export default function MovieDetailsPage() {
     }
 
     setSelectedVenueId(availableVenues[0].id);
-    setSelectedProjectionId("");
   }, [availableVenues, selectedCityId, selectedVenueId]);
   useEffect(() => {
     async function loadMovieDetails() {
@@ -86,7 +83,6 @@ export default function MovieDetailsPage() {
         setSelectedDate(movieDetails.projectionDates[0] ?? "");
         setSelectedCityId("");
         setSelectedVenueId("");
-        setSelectedProjectionId("");
       } catch {
         setErrorMessage("Movie details could not be loaded.");
       } finally {
@@ -109,16 +105,6 @@ export default function MovieDetailsPage() {
           venueIds: selectedVenueId ? [selectedVenueId] : undefined,
         });
         setProjections(result);
-        setSelectedProjectionId((currentProjectionId) => {
-          const stillExists = result.some(
-            (projection) => projection.projectionId === currentProjectionId,
-          );
-          if (stillExists) {
-            return currentProjectionId;
-          }
-
-          return result.length === 1 ? result[0].projectionId : "";
-        });
       } catch {
         setProjections([]);
         showToast("Projection times could not be loaded.", "error");
@@ -142,13 +128,13 @@ export default function MovieDetailsPage() {
   function handleSignUpRequired() {
     openSignUp();
   }
-  function handleTicketAction(mode: BookingMode) {
-    if (!movieId || !selectedProjectionId) {
+  function handleTicketAction(projectionId: string, mode: BookingMode) {
+    if (!movieId || !projectionId) {
       return;
     }
 
     const selectedProjection = projections.find(
-      (projection) => projection.projectionId === selectedProjectionId,
+      (projection) => projection.projectionId === projectionId,
     );
 
     if (!selectedProjection) {
@@ -165,7 +151,7 @@ export default function MovieDetailsPage() {
     if (!currentUser) {
       saveBookingIntent({
         movieId,
-        projectionId: selectedProjectionId,
+        projectionId,
         mode,
       });
       openSignIn();
@@ -173,7 +159,7 @@ export default function MovieDetailsPage() {
     }
 
     navigate(
-      `/movies/${movieId}/seats?projectionId=${selectedProjectionId}&mode=${mode}`,
+      `/movies/${movieId}/seats?projectionId=${projectionId}&mode=${mode}`,
     );
   }
   if (isLoadingMovie) {
@@ -225,22 +211,13 @@ export default function MovieDetailsPage() {
                   selectedDate={selectedDate}
                   selectedCityId={selectedCityId}
                   selectedVenueId={selectedVenueId}
-                  selectedProjectionId={selectedProjectionId}
                   projections={projections}
-                  onDateChange={(date) => {
-                    setSelectedDate(date);
-                    setSelectedProjectionId("");
-                  }}
+                  onDateChange={setSelectedDate}
                   onCityChange={(cityId) => {
                     setSelectedCityId(cityId);
                     setSelectedVenueId("");
-                    setSelectedProjectionId("");
                   }}
-                  onVenueChange={(venueId) => {
-                    setSelectedVenueId(venueId);
-                    setSelectedProjectionId("");
-                  }}
-                  onProjectionChange={setSelectedProjectionId}
+                  onVenueChange={setSelectedVenueId}
                   onTicketAction={handleTicketAction}
                   onExpiredProjectionSelect={() =>
                     showToast(EXPIRED_PROJECTION_MESSAGE, "error")
