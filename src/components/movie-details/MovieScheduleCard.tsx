@@ -1,10 +1,14 @@
+import { useState } from "react";
 import FilterSelect from "@/components/common/FilterSelect";
 import CinemaIcon from "@/components/ui/icons/CinemaIcon";
 import LeftArrowIcon from "@/components/ui/icons/LeftArrowIcon";
 import LocationPinIcon from "@/components/ui/icons/LocationPinIcon";
 import RightArrowIcon from "@/components/ui/icons/RightArrowIcon";
+import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
+import type { BookingMode } from "@/types/booking";
 import type { FilterOption } from "@/types/common";
 import type { MovieDetails, MovieProjection } from "@/types/movieDetails";
+import { isProjectionTimePassed } from "@/utils/projectionTime";
 type MovieScheduleCardProps = {
   movie: MovieDetails;
   availableVenues: FilterOption[];
@@ -13,13 +17,16 @@ type MovieScheduleCardProps = {
   selectedVenueId: string;
   selectedProjectionId: string;
   projections: MovieProjection[];
-  isAuthenticated: boolean;
   onDateChange: (date: string) => void;
   onCityChange: (cityId: string) => void;
   onVenueChange: (venueId: string) => void;
   onProjectionChange: (projectionId: string) => void;
-  onAuthRequired: () => void;
+  onTicketAction: (mode: BookingMode) => void;
+  onExpiredProjectionSelect: () => void;
 };
+const DATE_PAGE_SIZE = 5;
+const MAX_VISIBLE_DATES = 10;
+
 function isSameDate(firstDate: Date, secondDate: Date) {
   return (
     firstDate.getFullYear() === secondDate.getFullYear() &&
@@ -46,6 +53,7 @@ function getDateLabel(date: string) {
 function formatProjectionTime(time: string) {
   return time.slice(0, 5);
 }
+
 export default function MovieScheduleCard({
   movie,
   availableVenues,
@@ -54,24 +62,39 @@ export default function MovieScheduleCard({
   selectedVenueId,
   selectedProjectionId,
   projections,
-  isAuthenticated,
   onDateChange,
   onCityChange,
   onVenueChange,
   onProjectionChange,
-  onAuthRequired,
+  onTicketAction,
+  onExpiredProjectionSelect,
 }: MovieScheduleCardProps) {
+  const [datePage, setDatePage] = useState(0);
+  const limitedProjectionDates = movie.projectionDates.slice(
+    0,
+    MAX_VISIBLE_DATES,
+  );
+  const totalDatePages = Math.ceil(
+    limitedProjectionDates.length / DATE_PAGE_SIZE,
+  );
+  const boundedDatePage = Math.min(datePage, Math.max(totalDatePages - 1, 0));
+  const visibleProjectionDates = limitedProjectionDates.slice(
+    boundedDatePage * DATE_PAGE_SIZE,
+    boundedDatePage * DATE_PAGE_SIZE + DATE_PAGE_SIZE,
+  );
+  const canGoBack = boundedDatePage > 0;
+  const canGoForward = boundedDatePage + 1 < totalDatePages;
   const selectedProjection = projections.find(
     (projection) => projection.projectionId === selectedProjectionId,
   );
-  const hasCompleteSelection = Boolean(
-    selectedCityId && selectedVenueId && selectedProjectionId,
-  );
-  const canStartAuthFlow = !isAuthenticated && hasCompleteSelection;
-  const showComingSoonDisabled = isAuthenticated;
-  function handleProtectedAction() {
-    if (canStartAuthFlow) {
-      onAuthRequired();
+  const isSelectedProjectionPassed = selectedProjection
+    ? isProjectionTimePassed(selectedDate, selectedProjection.startTime)
+    : false;
+  const canStartTicketAction =
+    Boolean(selectedProjection) && !isSelectedProjectionPassed;
+  function handleProtectedAction(mode: BookingMode) {
+    if (canStartTicketAction) {
+      onTicketAction(mode);
     }
   }
   return (
@@ -96,7 +119,7 @@ export default function MovieScheduleCard({
         </div>
         <div className="mt-6 grid grid-cols-[repeat(auto-fit,minmax(86px,1fr))] gap-3">
           {movie.projectionDates.length ? (
-            movie.projectionDates.map((date) => {
+            visibleProjectionDates.map((date) => {
               const isSelected = date === selectedDate;
               const label = getDateLabel(date);
               return (
@@ -132,15 +155,25 @@ export default function MovieScheduleCard({
         <div className="mt-4 flex justify-end gap-3">
           <button
             type="button"
-            disabled
-            className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-lg border border-movie-details-border bg-white text-pagination-button-icon-disabled"
+            disabled={!canGoBack}
+            onClick={() =>
+              setDatePage((currentDatePage) =>
+                Math.max(currentDatePage - 1, 0),
+              )
+            }
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-movie-details-border bg-white text-pagination-button-icon transition-colors enabled:cursor-pointer enabled:hover:border-brand-red/50 disabled:cursor-not-allowed disabled:text-pagination-button-icon-disabled"
           >
             <LeftArrowIcon />
           </button>
           <button
             type="button"
-            disabled
-            className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-lg border border-movie-details-border bg-white text-pagination-button-icon-disabled"
+            disabled={!canGoForward}
+            onClick={() =>
+              setDatePage((currentDatePage) =>
+                Math.min(currentDatePage + 1, totalDatePages - 1),
+              )
+            }
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-movie-details-border bg-white text-pagination-button-icon transition-colors enabled:cursor-pointer enabled:hover:border-brand-red/50 disabled:cursor-not-allowed disabled:text-pagination-button-icon-disabled"
           >
             <RightArrowIcon />
           </button>
@@ -154,14 +187,33 @@ export default function MovieScheduleCard({
               projections.map((projection) => {
                 const isSelected =
                   projection.projectionId === selectedProjectionId;
+                const isProjectionPassed = isProjectionTimePassed(
+                  selectedDate,
+                  projection.startTime,
+                );
                 return (
                   <button
                     key={projection.projectionId}
                     type="button"
-                    onClick={() => onProjectionChange(projection.projectionId)}
+                    onClick={() => {
+                      onProjectionChange(projection.projectionId);
+
+                      if (isProjectionPassed) {
+                        onExpiredProjectionSelect();
+                      }
+                    }}
+                    title={
+                      isProjectionPassed
+                        ? "This projection time has already passed."
+                        : undefined
+                    }
                     className={`h-12 cursor-pointer rounded-lg border px-4 text-body-md font-bold shadow-page-input transition-colors ${
                       isSelected
-                        ? "border-brand-red bg-brand-red text-white"
+                        ? isProjectionPassed
+                          ? "border-movie-details-border bg-movie-details-border text-white"
+                          : "border-brand-red bg-brand-red text-white"
+                        : isProjectionPassed
+                          ? "border-movie-details-border bg-white text-page-muted"
                         : "border-movie-details-border bg-white text-movie-details-heading hover:border-brand-red/50"
                     }`}
                   >
@@ -183,21 +235,26 @@ export default function MovieScheduleCard({
               </span>
             </p>
           )}
+          {isSelectedProjectionPassed && (
+            <p className="mt-3 text-right text-[14px] leading-5 font-semibold text-brand-red">
+              {EXPIRED_PROJECTION_MESSAGE}
+            </p>
+          )}
         </div>
       </div>
       <div className="mt-12 grid gap-4 border-t border-movie-details-border p-5 md:grid-cols-2 md:p-6">
         <button
           type="button"
-          disabled={!canStartAuthFlow || showComingSoonDisabled}
-          onClick={handleProtectedAction}
+          disabled={!canStartTicketAction}
+          onClick={() => handleProtectedAction("reserve")}
           className="h-12 rounded-lg border border-brand-red bg-white text-body-md font-semibold text-brand-red transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:border-movie-details-border disabled:text-movie-details-border"
         >
           Reserve Ticket
         </button>
         <button
           type="button"
-          disabled={!canStartAuthFlow || showComingSoonDisabled}
-          onClick={handleProtectedAction}
+          disabled={!canStartTicketAction}
+          onClick={() => handleProtectedAction("buy")}
           className="h-12 rounded-lg bg-brand-red text-body-md font-semibold text-white transition-colors enabled:cursor-pointer disabled:cursor-not-allowed disabled:bg-movie-details-border"
         >
           Buy Ticket
