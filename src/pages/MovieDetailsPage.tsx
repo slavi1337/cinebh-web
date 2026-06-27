@@ -7,6 +7,7 @@ import MovieScheduleCard from "@/components/movie-details/MovieScheduleCard";
 import MovieSeeAlsoSection from "@/components/movie-details/MovieSeeAlsoSection";
 import UpcomingNotifyCard from "@/components/movie-details/UpcomingNotifyCard";
 import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
+import { getSeatSelectionPath } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
 import {
   getMovieDetails,
@@ -174,9 +175,7 @@ export default function MovieDetailsPage() {
       return;
     }
 
-    navigate(
-      `/movies/${movieId}/seats?projectionId=${projectionId}&mode=${mode}`,
-    );
+    navigate(getSeatSelectionPath(movieId, projectionId, mode));
   }
   if (isLoadingMovie) {
     return (

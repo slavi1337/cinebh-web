@@ -2,6 +2,10 @@ import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
 import GroupedShowtimes from "@/components/showtimes/GroupedShowtimes";
+import {
+  getMovieDetailsPath,
+  getSeatSelectionPath,
+} from "@/constants/routes";
 import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
 import { formatDuration, formatEndDate } from "@/utils/currentlyShowing";
 import { formatVenueLabel, formatVenueSummary } from "@/utils/venues";
@@ -29,15 +33,13 @@ export default function CurrentlyShowingCard({
   ].filter(Boolean);
 
   function handleShowtimeClick(projectionId: string) {
-    navigate(
-      `/movies/${movie.movieId}/seats?projectionId=${projectionId}&mode=buy`,
-    );
+    navigate(getSeatSelectionPath(movie.movieId, projectionId, "buy"));
   }
 
   return (
     <article className="rounded-3xl border border-border-default bg-white p-4 shadow-movie-card md:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-4">
-        <Link to={`/movies/${movie.movieId}`} className="shrink-0">
+        <Link to={getMovieDetailsPath(movie.movieId)} className="shrink-0">
           <img
             src={movie.posterImageUrl || moviePosterPlaceholder}
             alt={movie.title}
@@ -46,7 +48,7 @@ export default function CurrentlyShowingCard({
         </Link>
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-6 lg:min-h-71.75">
           <div>
-            <Link to={`/movies/${movie.movieId}`}>
+            <Link to={getMovieDetailsPath(movie.movieId)}>
               <h2 className="cursor-pointer text-[32px] leading-10 font-bold tracking-[-0.0025em] text-page-heading hover:text-brand-red">
                 {movie.title}
               </h2>

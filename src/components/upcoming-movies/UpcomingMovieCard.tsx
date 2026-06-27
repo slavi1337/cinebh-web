@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
+import { getMovieDetailsPath } from "@/constants/routes";
 import type { UpcomingMovie } from "@/types/upcomingMovies";
 import {
   formatOpeningLabel,
@@ -26,7 +27,7 @@ export default function UpcomingMovieCard({ movie }: UpcomingMovieCardProps) {
   );
   return (
     <Link
-      to={`/movies/${movie.movieId}`}
+      to={getMovieDetailsPath(movie.movieId)}
       className="block w-full cursor-pointer rounded-3xl border border-border-default bg-white p-4 shadow-movie-card transition-transform hover:-translate-y-1"
     >
       <div className="relative">

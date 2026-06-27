@@ -21,6 +21,10 @@ import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
 import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
 import { useAuth } from "@/context/AuthContext";
 import {
+  getMovieDetailsPath,
+  ROUTE_PATHS,
+} from "@/constants/routes";
+import {
   cancelBookingHold,
   createCheckoutSession,
   getProjectionSeatWebSocketUrl,
@@ -437,14 +441,22 @@ export default function SeatSelectionPage() {
 
   async function handleCancelHold() {
     if (!hold) {
-      navigate(movieId ? `/movies/${movieId}` : "/currently-showing");
+      navigate(
+        movieId
+          ? getMovieDetailsPath(movieId)
+          : ROUTE_PATHS.currentlyShowing,
+      );
       return;
     }
 
     try {
       setIsUpdating(true);
       await cancelBookingHold(hold.bookingId);
-      navigate(movieId ? `/movies/${movieId}` : "/currently-showing");
+      navigate(
+        movieId
+          ? getMovieDetailsPath(movieId)
+          : ROUTE_PATHS.currentlyShowing,
+      );
     } catch {
       showToast("Seat selection session could not be cancelled.", "error");
     } finally {

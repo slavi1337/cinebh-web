@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { getSeatSelectionPath } from "@/constants/routes";
 import {
   clearBookingIntent,
   readBookingIntent,
@@ -22,16 +23,19 @@ export default function BookingIntentRedirect() {
       return;
     }
 
-    const targetPath = `/movies/${intent.movieId}/seats`;
-    const targetSearch = `?projectionId=${intent.projectionId}&mode=${intent.mode}`;
+    const targetLocation = getSeatSelectionPath(
+      intent.movieId,
+      intent.projectionId,
+      intent.mode,
+    );
 
     clearBookingIntent();
 
-    if (location.pathname === targetPath && location.search === targetSearch) {
+    if (`${location.pathname}${location.search}` === targetLocation) {
       return;
     }
 
-    navigate(`${targetPath}${targetSearch}`);
+    navigate(targetLocation);
   }, [currentUser, location.pathname, location.search, navigate]);
 
   return null;
