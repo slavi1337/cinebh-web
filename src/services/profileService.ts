@@ -52,7 +52,7 @@ export async function getUserProjections(
   status: ProjectionHistoryStatus,
 ): Promise<UserProjection[]> {
   const response = await api.get<UserProjection[]>(API_ENDPOINTS.users.projections, {
-    params: { status },
+    params: { status: status.toUpperCase() },
   });
   return response.data;
 }

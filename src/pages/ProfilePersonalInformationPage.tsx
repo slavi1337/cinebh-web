@@ -2,11 +2,16 @@ import axios from "axios";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PageStatusCard from "@/components/common/PageStatusCard";
+import AvatarPreview from "@/components/profile/AvatarPreview";
+import DeactivateModal from "@/components/profile/DeactivateModal";
 import ProfileFieldIcon from "@/components/profile/ProfileFieldIcon";
 import ProfileFormField from "@/components/profile/ProfileFormField";
 import ProfileLayout from "@/components/profile/ProfileLayout";
-import { API_ENDPOINTS } from "@/constants/apiEndpoints";
-import { getApiBaseUrl } from "@/constants/apiConfig";
+import GlobeIcon from "@/components/ui/icons/GlobeIcon";
+import LocationPinIcon from "@/components/ui/icons/LocationPinIcon";
+import MailIcon from "@/components/ui/icons/MailIcon";
+import PhoneIcon from "@/components/ui/icons/PhoneIcon";
+import UserIcon from "@/components/ui/icons/UserIcon";
 import { useAuth } from "@/context/AuthContext";
 import {
   deactivateUserProfile,
@@ -17,6 +22,7 @@ import {
 } from "@/services/profileService";
 import type { CityOption, UserProfile } from "@/types/profile";
 import { getApiErrorMessage } from "@/utils/auth";
+import { blankToNull } from "@/utils/stringUtils";
 
 type ProfileFormState = {
   firstName: string;
@@ -27,75 +33,6 @@ type ProfileFormState = {
   cityId: string;
 };
 
-function PhoneIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M5.2 2.5 6.3 5 4.9 6.1a8.2 8.2 0 0 0 5 5l1.1-1.4 2.5 1.1-.4 2.6c-.1.6-.6 1-1.2 1A10.4 10.4 0 0 1 1.6 4.1c0-.6.4-1.1 1-1.2l2.6-.4Z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M2.5 4.5h11v7h-11v-7Zm.7.7L8 8.6l4.8-3.4"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function LocationIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M8 14s4-3.8 4-7a4 4 0 1 0-8 0c0 3.2 4 7 4 7Z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-      />
-      <circle cx="8" cy="7" r="1.4" stroke="currentColor" strokeWidth="1.2" />
-    </svg>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.2" />
-      <path
-        d="M2.7 8h10.6M8 2.5c1.4 1.4 2.1 3.2 2.1 5.5S9.4 12.1 8 13.5C6.6 12.1 5.9 10.3 5.9 8S6.6 3.9 8 2.5Z"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm5 6a5 5 0 0 0-10 0"
-        stroke="currentColor"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 function fullName(profile: UserProfile) {
   const name = [profile.firstName, profile.lastName]
     .filter(Boolean)
@@ -103,11 +40,6 @@ function fullName(profile: UserProfile) {
     .trim();
 
   return name || profile.email;
-}
-
-function blankToNull(value: string) {
-  const trimmedValue = value.trim();
-  return trimmedValue.length > 0 ? trimmedValue : null;
 }
 
 function profileToFormState(profile: UserProfile): ProfileFormState {
@@ -119,125 +51,6 @@ function profileToFormState(profile: UserProfile): ProfileFormState {
     country: profile.country ?? "",
     cityId: profile.cityId ?? "",
   };
-}
-
-function isManagedProfileImageUrl(profileImageUrl: string) {
-  return profileImageUrl.includes("/profile-images/");
-}
-
-function profileImageSrc(profile: UserProfile) {
-  if (!profile.profileImageUrl) {
-    return null;
-  }
-
-  if (!isManagedProfileImageUrl(profile.profileImageUrl)) {
-    return profile.profileImageUrl;
-  }
-
-  const apiBaseUrl = getApiBaseUrl().replace(/\/$/, "");
-  return `${apiBaseUrl}${API_ENDPOINTS.users.profileImage}?v=${encodeURIComponent(
-    profile.profileImageUrl,
-  )}`;
-}
-
-function AvatarPreview({
-  profile,
-  isEditable,
-  isUploading,
-  onUploadClick,
-}: {
-  profile: UserProfile;
-  isEditable: boolean;
-  isUploading: boolean;
-  onUploadClick: () => void;
-}) {
-  const imageSrc = profileImageSrc(profile);
-  const [failedImageSrc, setFailedImageSrc] = useState<string | null>(null);
-  const initials = fullName(profile)
-    .split(" ")
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-  const shouldShowImage = imageSrc && failedImageSrc !== imageSrc;
-
-  const content = shouldShowImage ? (
-    <img
-      src={imageSrc}
-      alt={fullName(profile)}
-      onError={() => setFailedImageSrc(imageSrc)}
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <div className="flex h-full w-full items-center justify-center bg-brand-red/10 text-[44px] font-bold text-brand-red">
-      {initials}
-    </div>
-  );
-
-  return (
-    <div className="relative h-50 w-50 overflow-hidden rounded-2xl bg-movie-details-chip-background md:h-56 md:w-56">
-      {content}
-      {isEditable ? (
-        <button
-          type="button"
-          disabled={isUploading}
-          onClick={onUploadClick}
-          className="absolute inset-x-0 bottom-0 h-12 bg-auth-overlay text-body-md font-semibold text-white transition enabled:cursor-pointer enabled:hover:bg-navbar-background/80 disabled:cursor-not-allowed"
-        >
-          {isUploading ? "Uploading..." : "Upload Photo"}
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-function DeactivateModal({
-  isSubmitting,
-  onCancel,
-  onConfirm,
-}: {
-  isSubmitting: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-[90] flex items-start justify-center bg-auth-overlay px-4 pt-30">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="deactivate-profile-title"
-        className="w-full max-w-110 rounded-2xl bg-white px-7 py-6 shadow-movie-card"
-      >
-        <h2
-          id="deactivate-profile-title"
-          className="text-[20px] leading-6 font-bold text-page-heading"
-        >
-          Deactivate My Account
-        </h2>
-        <p className="mt-3 text-[14px] leading-5 text-page-muted">
-          This will deactivate your account and sign you out immediately.
-        </p>
-        <div className="mt-7 flex justify-end gap-3">
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={onCancel}
-            className="h-10 rounded-lg border border-brand-red px-5 text-[14px] leading-5 font-semibold text-brand-red transition enabled:cursor-pointer enabled:hover:bg-brand-red/5 disabled:cursor-not-allowed"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={onConfirm}
-            className="h-10 rounded-lg bg-brand-red px-5 text-[14px] leading-5 font-semibold text-white transition enabled:cursor-pointer enabled:hover:bg-brand-red/90 disabled:cursor-not-allowed disabled:bg-movie-details-border"
-          >
-            {isSubmitting ? "Deactivating..." : "Deactivate"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function ProfilePersonalInformationPage() {
@@ -413,6 +226,7 @@ export default function ProfilePersonalInformationPage() {
     );
   }
 
+  const displayName = fullName(profile);
   const headerAction = !isEditing ? (
     <button
       type="button"
@@ -438,13 +252,14 @@ export default function ProfilePersonalInformationPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center">
             <AvatarPreview
               profile={profile}
+              displayName={displayName}
               isEditable={false}
               isUploading={false}
               onUploadClick={() => undefined}
             />
             <div>
               <h2 className="text-[28px] leading-8 font-bold tracking-[-0.0015em] text-page-heading">
-                {fullName(profile)}
+                {displayName}
               </h2>
               <div className="mt-5 space-y-4 text-body-md text-page-heading">
                 <p className="flex items-center gap-3">
@@ -461,7 +276,7 @@ export default function ProfilePersonalInformationPage() {
                 </p>
                 <p className="flex items-center gap-3">
                   <ProfileFieldIcon>
-                    <LocationIcon />
+                    <LocationPinIcon />
                   </ProfileFieldIcon>
                   {profile.cityName || "No city selected"}
                 </p>
@@ -480,6 +295,7 @@ export default function ProfilePersonalInformationPage() {
           <div className="flex justify-center">
             <AvatarPreview
               profile={profile}
+              displayName={displayName}
               isEditable
               isUploading={isUploading}
               onUploadClick={() => fileInputRef.current?.click()}
@@ -547,7 +363,7 @@ export default function ProfilePersonalInformationPage() {
                 value={formValues.cityId}
                 icon={
                   <ProfileFieldIcon>
-                    <LocationIcon />
+                    <LocationPinIcon />
                   </ProfileFieldIcon>
                 }
                 onChange={(event) => updateFormValue("cityId", event.target.value)}

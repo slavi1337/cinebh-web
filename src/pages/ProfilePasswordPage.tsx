@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageStatusCard from "@/components/common/PageStatusCard";
 import ProfileLayout from "@/components/profile/ProfileLayout";
 import ProfileLockIcon from "@/components/profile/ProfileLockIcon";
@@ -112,7 +113,8 @@ function PasswordInputField({
 }
 
 export default function ProfilePasswordPage() {
-  const { currentUser, openSignIn, showToast } = useAuth();
+  const navigate = useNavigate();
+  const { currentUser, openSignIn, showToast, logout } = useAuth();
   const [values, setValues] =
     useState<ChangePasswordFormValues>(EMPTY_FORM_VALUES);
   const [touchedFields, setTouchedFields] = useState<
@@ -169,7 +171,10 @@ export default function ProfilePasswordPage() {
       setIsSaving(true);
       await changeUserPassword(values);
       resetForm();
-      showToast("Password changed successfully.");
+      await logout();
+      navigate("/", { replace: true });
+      openSignIn();
+      showToast("Password changed successfully. Sign in with your new password.");
     } catch (error) {
       setServerError(getApiErrorMessage(error));
     } finally {

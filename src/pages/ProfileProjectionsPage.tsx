@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PageStatusCard from "@/components/common/PageStatusCard";
 import ProfileBookingDetails from "@/components/profile/ProfileBookingDetails";
 import ProfileLayout from "@/components/profile/ProfileLayout";
@@ -52,11 +52,15 @@ function ProjectionTabs({
   onTabChange,
 }: {
   activeTab: ProjectionHistoryStatus;
-  upcomingCount: number;
-  pastCount: number;
+  upcomingCount: number | null;
+  pastCount: number | null;
   onTabChange: (tab: ProjectionHistoryStatus) => void;
 }) {
-  const tabs: { id: ProjectionHistoryStatus; label: string; count: number }[] = [
+  const tabs: {
+    id: ProjectionHistoryStatus;
+    label: string;
+    count: number | null;
+  }[] = [
     { id: "upcoming", label: "Upcoming", count: upcomingCount },
     { id: "past", label: "Past", count: pastCount },
   ];
@@ -75,7 +79,8 @@ function ProjectionTabs({
                 : "border-transparent text-page-heading hover:text-brand-red"
             }`}
           >
-            {tab.label} ({tab.count})
+            {tab.label}
+            {tab.count === null ? "" : ` (${tab.count})`}
           </button>
         ))}
       </div>
@@ -91,46 +96,69 @@ export default function ProfileProjectionsPage() {
     UserProjection[]
   >([]);
   const [pastProjections, setPastProjections] = useState<UserProjection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [loadedTabs, setLoadedTabs] = useState<Set<ProjectionHistoryStatus>>(
+    () => new Set(),
+  );
+  const [errorMessages, setErrorMessages] = useState<
+    Record<ProjectionHistoryStatus, string>
+  >({ upcoming: "", past: "" });
+  const loadingTabsRef = useRef<Set<ProjectionHistoryStatus>>(new Set());
 
-  const loadProjections = useCallback(async () => {
+  const loadProjections = useCallback(async (status: ProjectionHistoryStatus) => {
     if (!currentUser) {
-      setIsLoading(false);
-      setErrorMessage("Sign in to view your projections.");
+      setErrorMessages((currentMessages) => ({
+        ...currentMessages,
+        [status]: "Sign in to view your projections.",
+      }));
       openSignIn();
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setErrorMessage("");
-      const [upcomingResponse, pastResponse] = await Promise.all([
-        getUserProjections("upcoming"),
-        getUserProjections("past"),
-      ]);
+    if (loadedTabs.has(status) || loadingTabsRef.current.has(status)) {
+      return;
+    }
 
-      setUpcomingProjections(upcomingResponse);
-      setPastProjections(pastResponse);
+    try {
+      loadingTabsRef.current.add(status);
+      setErrorMessages((currentMessages) => ({
+        ...currentMessages,
+        [status]: "",
+      }));
+      const response = await getUserProjections(status);
+
+      if (status === "upcoming") {
+        setUpcomingProjections(response);
+      } else {
+        setPastProjections(response);
+      }
+      setLoadedTabs((currentTabs) => new Set(currentTabs).add(status));
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         openSignIn();
-        setErrorMessage("Sign in to view your projections.");
+        setErrorMessages((currentMessages) => ({
+          ...currentMessages,
+          [status]: "Sign in to view your projections.",
+        }));
         return;
       }
 
-      setErrorMessage(getApiErrorMessage(error));
+      setErrorMessages((currentMessages) => ({
+        ...currentMessages,
+        [status]: getApiErrorMessage(error),
+      }));
     } finally {
-      setIsLoading(false);
+      loadingTabsRef.current.delete(status);
     }
-  }, [currentUser, openSignIn]);
+  }, [currentUser, loadedTabs, openSignIn]);
 
   useEffect(() => {
-    void loadProjections();
-  }, [loadProjections]);
+    void loadProjections(activeTab);
+  }, [activeTab, loadProjections]);
 
   const activeProjections =
     activeTab === "upcoming" ? upcomingProjections : pastProjections;
+  const isLoading = !loadedTabs.has(activeTab) && !errorMessages[activeTab];
+  const errorMessage = errorMessages[activeTab];
 
   if (isLoading) {
     return (
@@ -152,8 +180,10 @@ export default function ProfileProjectionsPage() {
     <ProfileLayout title="Projections">
       <ProjectionTabs
         activeTab={activeTab}
-        upcomingCount={upcomingProjections.length}
-        pastCount={pastProjections.length}
+        upcomingCount={
+          loadedTabs.has("upcoming") ? upcomingProjections.length : null
+        }
+        pastCount={loadedTabs.has("past") ? pastProjections.length : null}
         onTabChange={setActiveTab}
       />
 
