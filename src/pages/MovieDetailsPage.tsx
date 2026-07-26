@@ -7,6 +7,7 @@ import MovieScheduleCard from "@/components/movie-details/MovieScheduleCard";
 import MovieSeeAlsoSection from "@/components/movie-details/MovieSeeAlsoSection";
 import UpcomingNotifyCard from "@/components/movie-details/UpcomingNotifyCard";
 import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
+import { getSeatSelectionPath } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
 import {
   getMovieDetails,
@@ -113,6 +114,7 @@ export default function MovieDetailsPage() {
           const stillExists = result.some(
             (projection) => projection.projectionId === currentProjectionId,
           );
+
           if (stillExists) {
             return currentProjectionId;
           }
@@ -121,6 +123,7 @@ export default function MovieDetailsPage() {
         });
       } catch {
         setProjections([]);
+        setSelectedProjectionId("");
         showToast("Projection times could not be loaded.", "error");
       } finally {
         setIsLoadingProjections(false);
@@ -142,13 +145,13 @@ export default function MovieDetailsPage() {
   function handleSignUpRequired() {
     openSignUp();
   }
-  function handleTicketAction(mode: BookingMode) {
-    if (!movieId || !selectedProjectionId) {
+  function handleTicketAction(projectionId: string, mode: BookingMode) {
+    if (!movieId || !projectionId) {
       return;
     }
 
     const selectedProjection = projections.find(
-      (projection) => projection.projectionId === selectedProjectionId,
+      (projection) => projection.projectionId === projectionId,
     );
 
     if (!selectedProjection) {
@@ -165,16 +168,14 @@ export default function MovieDetailsPage() {
     if (!currentUser) {
       saveBookingIntent({
         movieId,
-        projectionId: selectedProjectionId,
+        projectionId,
         mode,
       });
       openSignIn();
       return;
     }
 
-    navigate(
-      `/movies/${movieId}/seats?projectionId=${selectedProjectionId}&mode=${mode}`,
-    );
+    navigate(getSeatSelectionPath(movieId, projectionId, mode));
   }
   if (isLoadingMovie) {
     return (

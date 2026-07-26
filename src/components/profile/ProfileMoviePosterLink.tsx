@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
+import { getMovieDetailsPath } from "@/constants/routes";
 
 type ProfileMoviePosterLinkProps = {
   movieId: string;
@@ -14,7 +15,7 @@ export default function ProfileMoviePosterLink({
 }: ProfileMoviePosterLinkProps) {
   return (
     <Link
-      to={`/movies/${movieId}`}
+      to={getMovieDetailsPath(movieId)}
       className="block h-28 w-28 overflow-hidden rounded-2xl bg-movie-details-chip-background"
     >
       <img
