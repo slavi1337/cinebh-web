@@ -1,4 +1,6 @@
+import type { ReactNode } from "react";
 import type { Seat, SeatType, SelectedSeat } from "@/types/booking";
+import VipSeatIcon from "@/components/booking/VipSeatIcon";
 
 type BookingSummaryProps = {
   seats: SelectedSeat[];
@@ -24,19 +26,24 @@ function formatTotalPrice(totalPrice: number) {
   return `${Number(totalPrice).toFixed(0)} KM`;
 }
 
-function seatTypePreview(type: SeatType) {
-  if (type === "VIP") {
-    return "* XY";
+function SeatTypePreview({ type }: { type: SeatType }) {
+  if (type !== "VIP") {
+    return "XY";
   }
 
-  return "XY";
+  return (
+    <span className="flex items-center gap-1">
+      <VipSeatIcon />
+      <span>XY</span>
+    </span>
+  );
 }
 
 function SeatGuideBox({
   children,
   className = "",
 }: {
-  children: string;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -87,7 +94,7 @@ function SeatGuide({ seats }: { seats: Seat[] }) {
                 className="flex items-center gap-3 text-body-md text-page-heading"
               >
                 <SeatGuideBox className={type === "LOVE" ? "min-w-23" : ""}>
-                  {seatTypePreview(type)}
+                  <SeatTypePreview type={type} />
                 </SeatGuideBox>
                 <span>
                   {SEAT_TYPE_LABELS[type]} ({price.toFixed(0)} BAM)

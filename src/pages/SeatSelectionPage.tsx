@@ -125,16 +125,22 @@ function SeatSessionTimer({
         </span>
         Session Duration
         <span className="pointer-events-none absolute top-8 right-0 z-10 w-52 rounded-lg bg-page-heading px-4 py-3 text-center text-[12px] leading-4 text-white opacity-0 shadow-movie-card transition-opacity group-hover:opacity-100">
-          Session will expire in 5 minutes and selected seats will be refreshed
+          The session timer starts after you select your first seat.
         </span>
       </span>
-      <SessionTimer
-        expiresAt={expiresAt}
-        showLabel={false}
-        className="rounded-lg border border-border-default bg-white px-3 py-2 text-center text-page-heading shadow-page-input"
-        timeClassName="text-[18px] leading-6 font-bold tabular-nums"
-        onExpired={onExpired}
-      />
+      {expiresAt ? (
+        <SessionTimer
+          expiresAt={expiresAt}
+          showLabel={false}
+          className="rounded-lg border border-border-default bg-white px-3 py-2 text-center text-page-heading shadow-page-input"
+          timeClassName="text-[18px] leading-6 font-bold tabular-nums"
+          onExpired={onExpired}
+        />
+      ) : (
+        <div className="rounded-lg border border-border-default bg-white px-3 py-2 text-center text-page-heading shadow-page-input">
+          <p className="text-[14px] leading-6 font-semibold">Not started</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -262,33 +268,6 @@ export default function SeatSelectionPage() {
     }
   }, [mode, movieId, openSignIn, projectionId]);
 
-  const startEmptyHold = useCallback(async () => {
-    if (!projectionId || isUpdating) {
-      return;
-    }
-
-    try {
-      setIsUpdating(true);
-      const response = await holdBookingSeats({
-        projectionId,
-        seatTemplateIds: [],
-      });
-
-      setHold(response);
-      setSelectedSeatIds(new Set());
-      setIsSessionExpired(false);
-    } catch (error) {
-      const message =
-        axios.isAxiosError(error) && error.response?.status === 400
-          ? getApiErrorMessage(error)
-          : "Seat selection session could not be started.";
-
-      showToast(message, "error");
-    } finally {
-      setIsUpdating(false);
-    }
-  }, [isUpdating, projectionId, showToast]);
-
   useEffect(() => {
     if (!currentUser) {
       if (!hasRequestedAuthRef.current && movieId && projectionId) {
@@ -303,21 +282,6 @@ export default function SeatSelectionPage() {
 
     void loadSeatMap();
   }, [currentUser, loadSeatMap, mode, movieId, openSignIn, projectionId]);
-
-  useEffect(() => {
-    if (!currentUser || !seatMap || hold || isSessionExpired || isUpdating) {
-      return;
-    }
-
-    void startEmptyHold();
-  }, [
-    currentUser,
-    hold,
-    isSessionExpired,
-    isUpdating,
-    seatMap,
-    startEmptyHold,
-  ]);
 
   useEffect(() => {
     if (paymentStatus !== "cancelled") {
@@ -426,6 +390,18 @@ export default function SeatSelectionPage() {
 
     try {
       setIsUpdating(true);
+
+      if (nextSelectedSeatIds.size === 0) {
+        if (hold) {
+          await cancelBookingHold(hold.bookingId);
+        }
+
+        setHold(null);
+        setSelectedSeatIds(new Set());
+        await loadSeatMap(false);
+        return;
+      }
+
       const response = await holdBookingSeats({
         projectionId,
         seatTemplateIds: Array.from(nextSelectedSeatIds),
@@ -456,7 +432,7 @@ export default function SeatSelectionPage() {
 
   async function handleStartNewSession() {
     setIsSessionExpired(false);
-    await startEmptyHold();
+    await loadSeatMap(false);
   }
 
   async function handleCancelHold() {
