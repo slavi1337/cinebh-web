@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
-import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
+import GroupedShowtimes from "@/components/showtimes/GroupedShowtimes";
 import {
-  formatDuration,
-  formatEndDate,
-  formatTimeLabel,
-} from "@/utils/currentlyShowing";
+  getMovieDetailsPath,
+  getSeatSelectionPath,
+} from "@/constants/routes";
+import type { CurrentlyShowingMovie } from "@/types/currentlyShowing";
+import { formatDuration, formatEndDate } from "@/utils/currentlyShowing";
 import { formatVenueLabel, formatVenueSummary } from "@/utils/venues";
 type CurrentlyShowingCardProps = {
   movie: CurrentlyShowingMovie;
@@ -14,12 +15,7 @@ type CurrentlyShowingCardProps = {
 export default function CurrentlyShowingCard({
   movie,
 }: CurrentlyShowingCardProps) {
-  const [selectedProjectionId, setSelectedProjectionId] = useState<
-    string | null
-  >(null);
-  const selectedProjection = movie.showtimes.find(
-    (showtime) => showtime.projectionId === selectedProjectionId,
-  );
+  const navigate = useNavigate();
   const venueSummary = useMemo(() => {
     const venues = Array.from(
       new Set(
@@ -35,10 +31,15 @@ export default function CurrentlyShowingCard({
     movie.language,
     formatDuration(movie.durationMinutes),
   ].filter(Boolean);
+
+  function handleShowtimeClick(projectionId: string) {
+    navigate(getSeatSelectionPath(movie.movieId, projectionId, "buy"));
+  }
+
   return (
     <article className="rounded-3xl border border-border-default bg-white p-4 shadow-movie-card md:p-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-4">
-        <Link to={`/movies/${movie.movieId}`} className="shrink-0">
+        <Link to={getMovieDetailsPath(movie.movieId)} className="shrink-0">
           <img
             src={movie.posterImageUrl || moviePosterPlaceholder}
             alt={movie.title}
@@ -47,7 +48,7 @@ export default function CurrentlyShowingCard({
         </Link>
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-6 lg:min-h-71.75">
           <div>
-            <Link to={`/movies/${movie.movieId}`}>
+            <Link to={getMovieDetailsPath(movie.movieId)}>
               <h2 className="cursor-pointer text-[32px] leading-10 font-bold tracking-[-0.0025em] text-page-heading hover:text-brand-red">
                 {movie.title}
               </h2>
@@ -87,33 +88,16 @@ export default function CurrentlyShowingCard({
           <p className="text-[20px] leading-6 font-bold tracking-[-0.0015em] text-brand-red">
             Showtimes
           </p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {movie.showtimes.map((showtime) => {
-              const isSelected = selectedProjectionId === showtime.projectionId;
-              return (
-                <button
-                  key={showtime.projectionId}
-                  type="button"
-                  onClick={() => setSelectedProjectionId(showtime.projectionId)}
-                  className={`inline-flex h-12 min-w-17.75 cursor-pointer items-center justify-center rounded-lg border px-4 text-[20px] leading-6 font-bold tracking-[-0.0015em] transition-colors ${
-                    isSelected
-                      ? "border-brand-red bg-brand-red text-white"
-                      : "border-border-default bg-white text-page-heading hover:border-brand-red hover:text-brand-red"
-                  }`}
-                >
-                  {formatTimeLabel(showtime.startTime)}
-                </button>
-              );
-            })}
+          <div className="mt-4">
+            <GroupedShowtimes
+              showtimes={movie.showtimes}
+              emptyLabel="No projection times available for selected filters."
+              maxHeightClassName="max-h-62"
+              onShowtimeClick={(showtime) =>
+                handleShowtimeClick(showtime.projectionId)
+              }
+            />
           </div>
-          {selectedProjection && (
-            <p className="mt-4 text-right text-[13px] leading-5 text-page-muted">
-              Cinema:{" "}
-              <span className="font-semibold text-page-heading">
-                {selectedProjection.venueName} ({selectedProjection.cityName})
-              </span>
-            </p>
-          )}
         </div>
       </div>
     </article>

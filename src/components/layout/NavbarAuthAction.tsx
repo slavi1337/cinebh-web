@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import SignInButton from "@/components/ui/buttons/SignInButton";
 import ChevronDownIcon from "@/components/ui/icons/ChevronDownIcon";
 import { useAuth } from "@/context/AuthContext";
@@ -70,8 +71,18 @@ export default function NavbarAuthAction({
       {isMenuOpen && (
         <div
           onClick={(event) => event.stopPropagation()}
-          className="absolute right-0 top-14 z-[80] w-40 rounded-lg border border-border-default bg-white p-2 shadow-movie-card"
+          className="absolute right-0 top-14 z-[80] w-48 rounded-lg border border-border-default bg-white p-2 shadow-movie-card"
         >
+          <Link
+            to="/profile"
+            onClick={() => {
+              setIsMenuOpen(false);
+              onActionComplete?.();
+            }}
+            className="block w-full rounded-md px-3 py-2 text-left text-body-md font-semibold text-page-heading hover:bg-page-background"
+          >
+            Profile
+          </Link>
           <button
             type="button"
             onClick={() => {

@@ -7,6 +7,8 @@ export type ProjectionTime = {
   venueName: string;
   cityId: string;
   cityName: string;
+  hallId: string;
+  hallName: string;
 };
 
 export type CurrentlyShowingFiltersResponse = {

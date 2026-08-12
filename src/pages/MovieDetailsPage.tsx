@@ -1,17 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageStatusCard from "@/components/common/PageStatusCard";
 import MovieInfoPanel from "@/components/movie-details/MovieInfoPanel";
 import MovieMediaGallery from "@/components/movie-details/MovieMediaGallery";
 import MovieScheduleCard from "@/components/movie-details/MovieScheduleCard";
 import MovieSeeAlsoSection from "@/components/movie-details/MovieSeeAlsoSection";
 import UpcomingNotifyCard from "@/components/movie-details/UpcomingNotifyCard";
+import { EXPIRED_PROJECTION_MESSAGE } from "@/constants/bookingMessages";
+import { getSeatSelectionPath } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
 import {
   getMovieDetails,
   getMovieProjections,
 } from "@/services/movieDetailsService";
+import type { BookingMode } from "@/types/booking";
 import type { MovieDetails, MovieProjection } from "@/types/movieDetails";
+import { saveBookingIntent } from "@/utils/bookingIntent";
+import { isProjectionTimePassed } from "@/utils/projectionTime";
 function isMovieUpcoming(movie: MovieDetails) {
   if (!movie.releaseDate) {
     return false;
@@ -24,6 +29,7 @@ function isMovieUpcoming(movie: MovieDetails) {
 }
 export default function MovieDetailsPage() {
   const { movieId } = useParams();
+  const navigate = useNavigate();
   const { currentUser, openSignIn, openSignUp, showToast } = useAuth();
   const [movie, setMovie] = useState<MovieDetails | null>(null);
   const [projections, setProjections] = useState<MovieProjection[]>([]);
@@ -37,6 +43,9 @@ export default function MovieDetailsPage() {
   const isUpcoming = useMemo(() => {
     return movie ? isMovieUpcoming(movie) : false;
   }, [movie]);
+  const shouldShowUpcomingNotify = useMemo(() => {
+    return Boolean(isUpcoming && !movie?.projectionDates.length);
+  }, [isUpcoming, movie]);
   const availableVenues = useMemo(() => {
     if (!movie) {
       return [];
@@ -46,6 +55,23 @@ export default function MovieDetailsPage() {
     }
     return movie.venues.filter((venue) => venue.cityId === selectedCityId);
   }, [movie, selectedCityId]);
+  useEffect(() => {
+    if (!movie || selectedCityId || movie.cities.length !== 1) {
+      return;
+    }
+
+    setSelectedCityId(movie.cities[0].id);
+    setSelectedVenueId("");
+    setSelectedProjectionId("");
+  }, [movie, selectedCityId]);
+  useEffect(() => {
+    if (!selectedCityId || selectedVenueId || availableVenues.length !== 1) {
+      return;
+    }
+
+    setSelectedVenueId(availableVenues[0].id);
+    setSelectedProjectionId("");
+  }, [availableVenues, selectedCityId, selectedVenueId]);
   useEffect(() => {
     async function loadMovieDetails() {
       if (!movieId) {
@@ -72,7 +98,7 @@ export default function MovieDetailsPage() {
   }, [movieId]);
   useEffect(() => {
     async function loadProjections() {
-      if (!movieId || !movie || isUpcoming || !selectedDate) {
+      if (!movieId || !movie || shouldShowUpcomingNotify || !selectedDate) {
         setProjections([]);
         return;
       }
@@ -88,10 +114,16 @@ export default function MovieDetailsPage() {
           const stillExists = result.some(
             (projection) => projection.projectionId === currentProjectionId,
           );
-          return stillExists ? currentProjectionId : "";
+
+          if (stillExists) {
+            return currentProjectionId;
+          }
+
+          return result.length === 1 ? result[0].projectionId : "";
         });
       } catch {
         setProjections([]);
+        setSelectedProjectionId("");
         showToast("Projection times could not be loaded.", "error");
       } finally {
         setIsLoadingProjections(false);
@@ -99,12 +131,12 @@ export default function MovieDetailsPage() {
     }
     void loadProjections();
   }, [
-    isUpcoming,
     movie,
     movieId,
     selectedCityId,
     selectedDate,
     selectedVenueId,
+    shouldShowUpcomingNotify,
     showToast,
   ]);
   function handleAuthRequired() {
@@ -112,6 +144,38 @@ export default function MovieDetailsPage() {
   }
   function handleSignUpRequired() {
     openSignUp();
+  }
+  function handleTicketAction(projectionId: string, mode: BookingMode) {
+    if (!movieId || !projectionId) {
+      return;
+    }
+
+    const selectedProjection = projections.find(
+      (projection) => projection.projectionId === projectionId,
+    );
+
+    if (!selectedProjection) {
+      return;
+    }
+
+    if (
+      isProjectionTimePassed(selectedDate, selectedProjection.startTime)
+    ) {
+      showToast(EXPIRED_PROJECTION_MESSAGE, "error");
+      return;
+    }
+
+    if (!currentUser) {
+      saveBookingIntent({
+        movieId,
+        projectionId,
+        mode,
+      });
+      openSignIn();
+      return;
+    }
+
+    navigate(getSeatSelectionPath(movieId, projectionId, mode));
   }
   if (isLoadingMovie) {
     return (
@@ -146,7 +210,7 @@ export default function MovieDetailsPage() {
         <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(420px,0.86fr)] lg:items-start">
           <MovieInfoPanel movie={movie} isUpcoming={isUpcoming} />
           <div>
-            {isUpcoming ? (
+            {shouldShowUpcomingNotify ? (
               <UpcomingNotifyCard
                 movie={movie}
                 isAuthenticated={Boolean(currentUser)}
@@ -156,6 +220,7 @@ export default function MovieDetailsPage() {
             ) : (
               <>
                 <MovieScheduleCard
+                  key={movie.id}
                   movie={movie}
                   availableVenues={availableVenues}
                   selectedDate={selectedDate}
@@ -163,8 +228,10 @@ export default function MovieDetailsPage() {
                   selectedVenueId={selectedVenueId}
                   selectedProjectionId={selectedProjectionId}
                   projections={projections}
-                  isAuthenticated={Boolean(currentUser)}
-                  onDateChange={setSelectedDate}
+                  onDateChange={(date) => {
+                    setSelectedDate(date);
+                    setSelectedProjectionId("");
+                  }}
                   onCityChange={(cityId) => {
                     setSelectedCityId(cityId);
                     setSelectedVenueId("");
@@ -175,17 +242,14 @@ export default function MovieDetailsPage() {
                     setSelectedProjectionId("");
                   }}
                   onProjectionChange={setSelectedProjectionId}
-                  onAuthRequired={handleAuthRequired}
+                  onTicketAction={handleTicketAction}
+                  onExpiredProjectionSelect={() =>
+                    showToast(EXPIRED_PROJECTION_MESSAGE, "error")
+                  }
                 />
                 {isLoadingProjections && (
                   <p className="mt-4 text-body-md text-page-muted">
                     Loading projection times...
-                  </p>
-                )}
-                {currentUser && (
-                  <p className="mt-4 text-body-md text-page-muted">
-                    Seat selection and checkout will be available in the next
-                    ticket.
                   </p>
                 )}
               </>

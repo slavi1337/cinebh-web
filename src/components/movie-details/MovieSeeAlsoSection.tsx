@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import moviePosterPlaceholder from "@/assets/movie-poster-placeholder.svg";
+import { getMovieDetailsPath } from "@/constants/routes";
 import LeftArrowIcon from "@/components/ui/icons/LeftArrowIcon";
 import RightArrowIcon from "@/components/ui/icons/RightArrowIcon";
 import type { MovieCardItem } from "@/types/homepage";
@@ -34,7 +35,7 @@ export default function MovieSeeAlsoSection({
             {visibleMovies.map((movie) => (
               <Link
                 key={movie.id}
-                to={`/movies/${movie.id}`}
+                to={getMovieDetailsPath(movie.id)}
                 className="flex h-50 cursor-pointer flex-col rounded-lg border border-movie-details-border bg-movie-details-card-background p-3 shadow-movie-card transition-transform hover:-translate-y-0.5"
               >
                 <img
