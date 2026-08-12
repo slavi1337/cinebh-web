@@ -62,7 +62,7 @@ export async function createCheckoutSession(
 }
 
 export function getProjectionSeatWebSocketUrl(projectionId: string) {
-  const url = new URL(getApiBaseUrl());
+  const url = new URL(getApiBaseUrl(), window.location.origin);
   const basePath = url.pathname.replace(/\/$/, "");
 
   url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
